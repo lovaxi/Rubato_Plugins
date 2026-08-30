@@ -1,0 +1,17 @@
+{
+  "name": "thinktime",
+  "version": "1.0.0",
+  "description": "ThinkTime model-state monitor for DeepSeek Harness: captures thinking/generating/done states and token usage per model call, estimates duration locally (feature-based kNN), and publishes to EMQX (thinktime/<deviceId>/state). Host-only plugin.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./mqtt": {
+      "default": "./lib/mqtt.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "license": "GPL-3.0"
+}
