@@ -46,11 +46,11 @@ the device shows a full-screen health reminder (time to drink water / rest).
 Paste this into a DSH chat:
 
 ```text
-Install the Thinktime plugin for DSH from https://github.com/lovaxi/Thinktime_Plugins (use the dsh/ directory)
+Install the Thinktime plugin for DSH from https://github.com/lovaxi/Thinktime_Plugins/dsh
 ```
 
-That is the whole install. The assistant copies the `dsh/` plugin package
-into place, registers it, and reminds you to restart. After the restart:
+That is the whole install. The assistant copies the plugin package into
+place, registers it, and reminds you to restart. After the restart:
 
 1. The console prints a `SETUP REQUIRED` guide and a config template is
    created automatically.

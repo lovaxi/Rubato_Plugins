@@ -43,11 +43,10 @@ token。MQTT 3.1.1 over TLS（8883），单条持久连接。
 在 DSH 对话里粘贴：
 
 ```text
-Install the Thinktime plugin for DSH from https://github.com/lovaxi/Thinktime_Plugins (use the dsh/ directory)
+Install the Thinktime plugin for DSH from https://github.com/lovaxi/Thinktime_Plugins/dsh
 ```
 
-这就是全部安装步骤。助手会把 `dsh/` 插件包复制到位并注册，然后提醒你重启。
-重启后：
+这就是全部安装步骤。助手会把插件包复制到位并注册，然后提醒你重启。重启后：
 
 1. 控制台会打印 `SETUP REQUIRED` 指南，并自动生成配置模板。
 2. 把设备贴纸上的两个值填进去——username = deviceId（`TT-xxxxxx`），
