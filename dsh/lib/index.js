@@ -2,7 +2,7 @@
 // Captures every streaming model call in this process (thinking / generating /
 // done) and publishes each state as MQTT messages
 // to EMQX Cloud (rubato/<username>/state). Auth mirrors the device firmware
-// (rubato.ino): username = deviceId (TT-<mac6>), password = the per-unit
+// (rubato.ino): username = deviceId (RUBATO-<mac6>), password = the per-unit
 // token. Loaded as a host plugin from the web profile's cordis.patch.yml, so
 // it auto-starts with dsh.
 //
@@ -189,7 +189,7 @@ export default {
       console.error('============================================================')
       console.error('[Rubato] SETUP REQUIRED - MQTT credentials not configured')
       console.error('  1. open:        ' + (cfg._path || '<plugin root>/dsh-mqtt-config.json'))
-      console.error('  2. "username":  the deviceId printed on the device sticker (TT-xxxxxx)')
+      console.error('  2. "username":  the deviceId printed on the device sticker (RUBATO-xxxxxx)')
       console.error('  3. "password":  the token paired with that deviceId')
       console.error('  save the file and you are done - the plugin auto-enables once both')
       console.error('  fields are filled (next message, no restart).')
@@ -243,7 +243,7 @@ export default {
           execute: async () => ({
             configured: Boolean(cfg.username && cfg.password),
             setupHint: cfg.username && cfg.password ? undefined
-              : 'MQTT credentials missing: put username (TT-xxxxxx from the device sticker) and password (token) into dsh-mqtt-config.json and save - the plugin auto-enables once both are filled (next message, no restart needed)',
+              : 'MQTT credentials missing: put username (RUBATO-xxxxxx from the device sticker) and password (token) into dsh-mqtt-config.json and save - the plugin auto-enables once both are filled (next message, no restart needed)',
             enabled: cfg.enabled,
             host: cfg.host,
             topic: cfg.topic,

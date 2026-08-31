@@ -4,7 +4,7 @@
 // TLS+CONNECT round trip. Broker: EMQX Cloud Serverless (TLS-only); explicit
 // SNI (servername) is required or the shared front-end cannot route the tenant.
 // Auth matches the device firmware (rubato.ino): username = deviceId
-// (TT-<mac6>), password = the per-unit token from the provisioning ledger.
+// (RUBATO-<mac6>), password = the per-unit token from the provisioning ledger.
 import net from 'node:net'
 import tls from 'node:tls'
 
@@ -197,7 +197,7 @@ function publishOnConn(c, topicBuf, payload, qos) {
  * @returns {Promise<{ok: true}>} resolves on PUBACK (qos1) or send (qos0); rejects on failure.
  */
 export async function publishRecord(config, record) {
-  // clientId goes to the broker exactly as configured (DSH-TT-<mac6>) — no
+  // clientId goes to the broker exactly as configured (DSH-RUBATO-<mac6>) — no
   // extra suffix. It differs from the device's own clientId (= deviceId), so
   // the two clients never kick each other. Note: only ONE publishing process
   // may run at a time — the Serverless front-end rejects a duplicate clientId
