@@ -32,7 +32,7 @@ persistent connection.
 | `Estimate` | `{ model, state, ts, estSec }` | predicted duration in seconds |
 | `Thinking` | `{ model, state, ts }` | first reasoning chunk |
 | `Generating` | `{ model, state, ts }` | first answer/tool chunk |
-| `Done` | `{ model, state, ts, tokens: { out, cache } }` | final usage; intermediate tool-call steps do not emit Done |
+| `Done` | `{ model, state, ts }` | intermediate tool-call steps do not emit Done |
 
 The device shows the model name and a breathing orb that changes color per
 phase — slow cream while thinking, faster ice-blue while generating, a green

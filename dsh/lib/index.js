@@ -196,7 +196,7 @@ export default {
       console.error('============================================================')
     }
 
-    const publish = async (record) => {
+    const publish = async (record, wire = record) => {
       cfg = loadConfig() // hot reload per record
       // Local archive: every record lands as one JSON line next to the config
       // file (always, regardless of MQTT enablement) for direct inspection.
@@ -207,7 +207,7 @@ export default {
       // are present; otherwise archive locally and keep waiting for setup.
       if (!cfg.enabled || !cfg.username || !cfg.password) { pushRecent(record); return }
       try {
-        await publishRecord(cfg, record)
+        await publishRecord(cfg, wire)
         state.published += 1
         state.last = { ok: true, at: Date.now(), state: record.state }
       } catch (e) {
@@ -353,13 +353,11 @@ export default {
           // model again — this stream is NOT the end of the turn, so no 'Done'
           // (only Thinking/Generating are emitted for such intermediate steps).
           if (finishReason === 'tool-calls') return
+          // Done wire contract is lean: { model, state, ts }. Token usage is
+          // kept for the local archive/status only — the device ignores it.
           const tokens = tokensFor(usage)
-          publish({
-            model,
-            state: 'Done',
-            ts: Date.now(),
-            ...(tokens ? { tokens } : {}),
-          })
+          const doneRecord = { model, state: 'Done', ts: Date.now(), ...(tokens ? { tokens } : {}) }
+          publish(doneRecord, { model, state: 'Done', ts: doneRecord.ts })
           // Backfill calibration: store this call's features, real duration
           // (ms) and the estimate made at stream start (est) — so the stats
           // file itself documents predicted-vs-actual per sample. Capped list.

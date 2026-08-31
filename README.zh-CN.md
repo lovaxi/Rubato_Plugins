@@ -30,7 +30,7 @@ token。MQTT 3.1.1 over TLS（8883），单条持久连接。
 | `Estimate` | `{ model, state, ts, estSec }` | 预估时长（秒） |
 | `Thinking` | `{ model, state, ts }` | 首个思考片段 |
 | `Generating` | `{ model, state, ts }` | 首个回答/工具片段 |
-| `Done` | `{ model, state, ts, tokens: { out, cache } }` | 最终用量；中间工具调用步骤不发送 Done |
+| `Done` | `{ model, state, ts }` | 中间工具调用步骤不发送 Done |
 
 设备屏幕显示模型名和随阶段变色的呼吸光环——思考时奶油色慢呼吸，生成时
 冰蓝色快呼吸，结束时绿色收尾。当预估时长较长且处于工作时间，设备会全屏
