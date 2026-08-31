@@ -28,7 +28,7 @@ model call ──> Rubato plugin ──> EMQX broker ──> Rubato device (TFT 
 
 All plugins publish the same messages on `rubato/<deviceId>/state` —
 one topic per device. Auth mirrors the device firmware: username = deviceId
-(`TT-xxxxxx`), password = its token. MQTT 3.1.1 over TLS (8883), one
+(`RUBATO-xxxxxx`), password = its token. MQTT 3.1.1 over TLS (8883), one
 persistent connection.
 
 | Message | Payload | Notes |
@@ -59,7 +59,7 @@ place, registers it, and reminds you to restart. After the restart:
 1. The console prints a `SETUP REQUIRED` guide and a config template is
    created automatically.
 2. Fill the two values from the device sticker — username = deviceId
-   (`TT-xxxxxx`), password = its token — by editing the file, or just tell
+   (`RUBATO-xxxxxx`), password = its token — by editing the file, or just tell
    them to the assistant.
 
 Save — the plugin auto-enables on the next message; no restart needed.
@@ -79,7 +79,7 @@ and reminds you to restart. After the restart:
 1. The console prints a `SETUP REQUIRED` guide and a config template is
    created automatically.
 2. Fill the two values from the device sticker — username = deviceId
-   (`TT-xxxxxx`), password = its token — by editing the file, or just tell
+   (`RUBATO-xxxxxx`), password = its token — by editing the file, or just tell
    them to the assistant.
 
 Save — the plugin auto-enables on the next message; no restart needed.
