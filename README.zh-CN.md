@@ -69,9 +69,7 @@ Install the Thinktime plugin for OpenCode from https://github.com/lovaxi/Thinkti
 2. 把设备贴纸上的两个值填进去——username = deviceId（`TT-xxxxxx`），
    password = 对应 token——可以自己编辑文件，或直接告诉助手。
 
-保存即完成——插件在下一条消息自动启用，无需重启。插件的 broker clientId
-由 deviceId 派生（`OC-TT-<mac6>`），可与 DSH 插件并存而互不踢线。随时让
-助手调用 `mqmon_status` 工具即可查看发布状态。
+保存即完成——插件在下一条消息自动启用，无需重启。
 
 ### OpenClaw / Codex / Claude Code / Cursor
 

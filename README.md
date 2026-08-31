@@ -78,11 +78,7 @@ and reminds you to restart. After the restart:
    (`TT-xxxxxx`), password = its token — by editing the file, or just tell
    them to the assistant.
 
-Save — the plugin auto-enables on the next message; no restart needed. The
-plugin derives its broker clientId from the deviceId (`OC-TT-<mac6>`), so it
-can run alongside the DSH plugin without the two kicking each other off the
-broker. Ask the assistant to call the `mqmon_status` tool any time to check
-publish health.
+Save — the plugin auto-enables on the next message; no restart needed.
 
 ### OpenClaw / Codex / Claude Code / Cursor
 
