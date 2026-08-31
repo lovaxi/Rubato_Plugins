@@ -1,0 +1,23 @@
+{
+  "name": "thinktime-opencode",
+  "version": "1.0.0",
+  "description": "ThinkTime model-state monitor for opencode: captures Estimate/Thinking/Generating/Done/Error states per model call via plugin hooks (token usage kept in the local archive), estimates duration locally (feature-based kNN), and publishes lean records to EMQX (thinktime/<deviceId>/state) with derived clientId OC-TT-<mac6>.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./mqtt": {
+      "default": "./lib/mqtt.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "thinktime",
+    "mqtt"
+  ],
+  "license": "GPL-3.0"
+}

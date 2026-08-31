@@ -17,7 +17,7 @@ Thinktime 让 AI 的工作状态在桌面实体设备上可见。本仓库为每
 | codex/ | Codex | 计划中 |
 | claude-code/ | Claude Code | 计划中 |
 | cursor/ | Cursor | 计划中 |
-| opencode/ | OpenCode | 计划中 |
+| [opencode/](opencode/) | OpenCode | 可用 |
 
 ## MQTT 契约
 
@@ -54,7 +54,26 @@ Install the Thinktime plugin for DSH from https://github.com/lovaxi/Thinktime_Pl
 
 保存即完成——插件在下一条消息自动启用，无需重启。
 
-### OpenClaw / Codex / Claude Code / Cursor / OpenCode
+### OpenCode
+
+在 opencode 对话里粘贴：
+
+```text
+Install the Thinktime plugin for OpenCode from https://github.com/lovaxi/Thinktime_Plugins/opencode
+```
+
+这就是全部安装步骤。助手会把插件包复制到位（项目 `.opencode/plugins/` 或
+全局 `~/.config/opencode/plugins/`），然后提醒你重启。重启后：
+
+1. 控制台会打印 `SETUP REQUIRED` 指南，并自动生成配置模板。
+2. 把设备贴纸上的两个值填进去——username = deviceId（`TT-xxxxxx`），
+   password = 对应 token——可以自己编辑文件，或直接告诉助手。
+
+保存即完成——插件在下一条消息自动启用，无需重启。插件的 broker clientId
+由 deviceId 派生（`OC-TT-<mac6>`），可与 DSH 插件并存而互不踢线。随时让
+助手调用 `mqmon_status` 工具即可查看发布状态。
+
+### OpenClaw / Codex / Claude Code / Cursor
 
 计划中。
 

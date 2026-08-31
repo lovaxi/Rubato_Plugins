@@ -18,7 +18,7 @@ model call ──> Thinktime plugin ──> EMQX broker ──> Thinktime device
 | codex/ | Codex | planned |
 | claude-code/ | Claude Code | planned |
 | cursor/ | Cursor | planned |
-| opencode/ | OpenCode | planned |
+| [opencode/](opencode/) | OpenCode | available |
 
 ## MQTT contract
 
@@ -60,7 +60,31 @@ place, registers it, and reminds you to restart. After the restart:
 
 Save — the plugin auto-enables on the next message; no restart needed.
 
-### OpenClaw / Codex / Claude Code / Cursor / OpenCode
+### OpenCode
+
+Paste this into an opencode chat:
+
+```text
+Install the Thinktime plugin for OpenCode from https://github.com/lovaxi/Thinktime_Plugins/opencode
+```
+
+That is the whole install. The assistant copies the plugin package into
+place (project `.opencode/plugins/` or global `~/.config/opencode/plugins/`)
+and reminds you to restart. After the restart:
+
+1. The console prints a `SETUP REQUIRED` guide and a config template is
+   created automatically.
+2. Fill the two values from the device sticker — username = deviceId
+   (`TT-xxxxxx`), password = its token — by editing the file, or just tell
+   them to the assistant.
+
+Save — the plugin auto-enables on the next message; no restart needed. The
+plugin derives its broker clientId from the deviceId (`OC-TT-<mac6>`), so it
+can run alongside the DSH plugin without the two kicking each other off the
+broker. Ask the assistant to call the `mqmon_status` tool any time to check
+publish health.
+
+### OpenClaw / Codex / Claude Code / Cursor
 
 Planned.
 
