@@ -19,7 +19,7 @@ model call ──> Rubato plugin ──> EMQX broker ──> Rubato device (TFT 
 | Directory | Agent | Status |
 |---|---|---|
 | [dsh/](dsh/) | DeepSeek Harness | available |
-| openclaw/ | OpenClaw | planned |
+| [openclaw/](openclaw/) | OpenClaw | available |
 | codex/ | Codex | planned |
 | claude-code/ | Claude Code | planned |
 | [cursor/](cursor/) | Cursor | available |
@@ -135,7 +135,29 @@ npx @vscode/vsce package        # -> rubato-cursor-<version>.vsix
 
 </details>
 
-### OpenClaw / Codex / Claude Code
+### OpenClaw
+
+Paste this into an OpenClaw chat:
+
+```text
+Install the Rubato plugin for OpenClaw from https://github.com/lovaxi/Rubato_Plugins/openclaw
+```
+
+That is the whole install. The assistant links the plugin package, enables
+it, grants the conversation-hook access it needs, and reminds you to restart.
+After the restart:
+
+1. The console prints a `SETUP REQUIRED` guide and a config template is
+   created automatically.
+2. Fill the two values from the device sticker — username = deviceId
+   (`RUBATO-xxxxxx`), password = its token — by editing the file, or just tell
+   them to the assistant.
+
+Save — the plugin auto-enables on the next message; no restart needed.
+OpenClaw's typed hooks have no first-delta event, so `Generating` is not
+emitted; the device stays in its thinking breath until `Done`.
+
+### Codex / Claude Code
 
 Planned.
 

@@ -17,7 +17,7 @@ Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个
 | 目录 | 智能体 | 状态 |
 |---|---|---|
 | [dsh/](dsh/) | DeepSeek Harness | 可用 |
-| openclaw/ | OpenClaw | 计划中 |
+| [openclaw/](openclaw/) | OpenClaw | 可用 |
 | codex/ | Codex | 计划中 |
 | claude-code/ | Claude Code | 计划中 |
 | [cursor/](cursor/) | Cursor | 可用 |
@@ -119,7 +119,25 @@ npx @vscode/vsce package        # 生成 rubato-cursor-<version>.vsix
 
 </details>
 
-### OpenClaw / Codex / Claude Code
+### OpenClaw
+
+在 OpenClaw 对话里粘贴：
+
+```text
+Install the Rubato plugin for OpenClaw from https://github.com/lovaxi/Rubato_Plugins/openclaw
+```
+
+这就是全部安装步骤。助手会链接插件包、启用、授予所需的会话钩子权限，并
+提醒你重启。重启后：
+
+1. 控制台会打印 `SETUP REQUIRED` 指南，并自动生成配置模板。
+2. 把设备贴纸上的两个值填进去——username = deviceId（`RUBATO-xxxxxx`），
+   password = 对应 token——可以自己编辑文件，或直接告诉助手。
+
+保存即完成——插件在下一条消息自动启用，无需重启。OpenClaw 类型化钩子没有
+首个增量事件，因此不发送 `Generating`；设备保持思考呼吸态直到 `Done`。
+
+### Codex / Claude Code
 
 计划中。
 

@@ -1,0 +1,13 @@
+{
+  "name": "rubato-openclaw",
+  "version": "1.0.0",
+  "description": "Rubato model-state monitor for OpenClaw: captures Estimate/Thinking/Done/Error states and token usage per model call, estimates duration locally (feature-based kNN), and publishes to EMQX (rubato/<deviceId>/state). Port of the DSH rubato plugin.",
+  "type": "module",
+  "main": "lib/index.js",
+  "openclaw": {
+    "extensions": [
+      "./lib/index.js"
+    ]
+  },
+  "license": "GPL-3.0"
+}
