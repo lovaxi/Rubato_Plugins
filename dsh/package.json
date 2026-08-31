@@ -1,7 +1,7 @@
 {
-  "name": "thinktime",
+  "name": "rubato",
   "version": "1.0.0",
-  "description": "ThinkTime model-state monitor for DeepSeek Harness: captures thinking/generating/done states and token usage per model call, estimates duration locally (feature-based kNN), and publishes to EMQX (thinktime/<deviceId>/state). Host-only plugin.",
+  "description": "Rubato (musical term: stolen time) model-state monitor for DeepSeek Harness: captures thinking/generating/done states per model call, estimates duration locally (feature-based kNN), and publishes to EMQX (rubato/<deviceId>/state). Host-only plugin.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

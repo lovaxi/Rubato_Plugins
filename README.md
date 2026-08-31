@@ -1,18 +1,18 @@
-# Thinktime
+# Rubato
 
 English | [简体中文](README.zh-CN.md)
 
-Thinktime makes your AI's working state visible — on a physical desk device.
-This repository hosts a Thinktime plugin for every supported coding agent,
+Rubato makes your AI's working state visible — on a physical desk device.
+This repository hosts a Rubato plugin for every supported coding agent,
 one directory each. The device firmware lives at
 [RubatoDevice](https://github.com/lovaxi/Rubato_Device).
 
-![Thinktime device](assets/product.jpg)
+![Rubato device](assets/product.jpg)
 
 
 
 ```
-model call ──> Thinktime plugin ──> EMQX broker ──> Thinktime device (TFT display)
+model call ──> Rubato plugin ──> EMQX broker ──> Rubato device (TFT display)
 ```
 
 | Directory | Agent | Status |
@@ -26,7 +26,7 @@ model call ──> Thinktime plugin ──> EMQX broker ──> Thinktime device
 
 ## MQTT contract
 
-All plugins publish the same messages on `thinktime/<deviceId>/state` —
+All plugins publish the same messages on `rubato/<deviceId>/state` —
 one topic per device. Auth mirrors the device firmware: username = deviceId
 (`TT-xxxxxx`), password = its token. MQTT 3.1.1 over TLS (8883), one
 persistent connection.
@@ -50,7 +50,7 @@ the device shows a full-screen health reminder (time to drink water / rest).
 Paste this into a DSH chat:
 
 ```text
-Install the Thinktime plugin for DSH from https://github.com/lovaxi/Thinktime_Plugins/dsh
+Install the Rubato plugin for DSH from https://github.com/lovaxi/Rubato_Plugins/dsh
 ```
 
 That is the whole install. The assistant copies the plugin package into
@@ -69,7 +69,7 @@ Save — the plugin auto-enables on the next message; no restart needed.
 Paste this into an opencode chat:
 
 ```text
-Install the Thinktime plugin for OpenCode from https://github.com/lovaxi/Thinktime_Plugins/opencode
+Install the Rubato plugin for OpenCode from https://github.com/lovaxi/Rubato_Plugins/opencode
 ```
 
 That is the whole install. The assistant copies the plugin package into

@@ -1,9 +1,9 @@
-// ThinkTime MQTT publisher — persistent in-process MQTT 3.1.1 connection.
+// Rubato MQTT publisher — persistent in-process MQTT 3.1.1 connection.
 // One TCP/TLS connection is kept alive (PINGREQ keepalive) and reused for every
 // record, so each publish is a single small packet instead of a full DNS+TCP+
 // TLS+CONNECT round trip. Broker: EMQX Cloud Serverless (TLS-only); explicit
 // SNI (servername) is required or the shared front-end cannot route the tenant.
-// Auth matches the device firmware (Thinktime.ino): username = deviceId
+// Auth matches the device firmware (rubato.ino): username = deviceId
 // (TT-<mac6>), password = the per-unit token from the provisioning ledger.
 import net from 'node:net'
 import tls from 'node:tls'

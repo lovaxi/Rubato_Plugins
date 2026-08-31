@@ -1,5 +1,5 @@
-// ThinkTime — durable model-state monitor for opencode.
-// Port of the DSH plugin (dsh/ in the Thinktime_Plugins repository); the
+// Rubato (musical term: stolen time) — durable model-state monitor for opencode.
+// Port of the DSH plugin (dsh/ in the Rubato_Plugins repository); the
 // device contract is identical:
 //   Estimate  { model, state:'Estimate', ts, estSec }   kNN duration prediction
 //   Thinking  { model, state:'Thinking', ts }           provider call started
@@ -11,7 +11,7 @@
 // connection) and archived as a JSON line next to the config file.
 //
 // Broker: EMQX Cloud Serverless (TLS-only). Auth mirrors the device firmware
-// (Thinktime.ino): username = deviceId (TT-<mac6>), password = the per-unit
+// (rubato.ino): username = deviceId (TT-<mac6>), password = the per-unit
 // token; clientId/topic/enabled are identity-derived, so the config only needs
 // username + password. This port derives clientId as 'OC-' + username, i.e.
 // OC-TT-<mac6> — distinct from the device (TT-<mac6>) and from the other
@@ -59,7 +59,7 @@ const DEFAULTS = {
   clientId: '', // derived: OC-<username> (= OC-TT-<mac6>)
   username: '',
   password: '',
-  topic: '', // derived: thinktime/<username>/state
+  topic: '', // derived: rubato/<username>/state
   qos: 1,
 }
 
@@ -77,7 +77,7 @@ const CONFIG_CANDIDATES = [
 function deriveIdentity(cfg) {
   if (cfg.username) {
     if (!cfg.clientId) cfg.clientId = 'OC-' + cfg.username
-    if (!cfg.topic) cfg.topic = 'thinktime/' + cfg.username + '/state'
+    if (!cfg.topic) cfg.topic = 'rubato/' + cfg.username + '/state'
   }
   if (cfg.enabled === undefined) cfg.enabled = Boolean(cfg.username && cfg.password)
   return cfg
@@ -276,11 +276,11 @@ function registerPlugin() {
   // Console policy: configuration reminders ONLY. No per-message or publish
   // chatter — runtime status lives in mqmon_status and the JSONL archive.
   if (cfg.enabled && (!cfg.host || !cfg.topic)) {
-    console.error('[Thinktime] enabled but host/topic missing; fix dsh-mqtt-config.json')
+    console.error('[Rubato] enabled but host/topic missing; fix dsh-mqtt-config.json')
   }
   if (unconfigured) {
     console.error('============================================================')
-    console.error('[Thinktime] SETUP REQUIRED - MQTT credentials not configured')
+    console.error('[Rubato] SETUP REQUIRED - MQTT credentials not configured')
     console.error('  1. open:        ' + (cfg._path || '<plugin root>/dsh-mqtt-config.json'))
     console.error('  2. "username":  the deviceId printed on the device sticker (TT-xxxxxx)')
     console.error('  3. "password":  the token paired with that deviceId')
@@ -438,7 +438,7 @@ function registerPlugin() {
       // device must not trail it.
       publish({ model, state: 'Thinking', ts: r.tStart })
     } catch (e) {
-      console.error('[Thinktime] chat.params handler failed: ' + ((e && e.message) || e))
+      console.error('[Rubato] chat.params handler failed: ' + ((e && e.message) || e))
     }
   }
 
@@ -590,7 +590,7 @@ function registerPlugin() {
   try {
     hooks.tool = {
       mqmon_status: {
-        description: 'Report the Thinktime plugin status: MQTT config summary, recent captured model-call records (Estimate/Thinking/Generating/Done/Error with token usage), and the last MQTT publish outcome.',
+        description: 'Report the Rubato plugin status: MQTT config summary, recent captured model-call records (Estimate/Thinking/Generating/Done/Error with token usage), and the last MQTT publish outcome.',
         args: {},
         execute: async () => JSON.stringify({
           configured: Boolean(cfg.username && cfg.password),
@@ -621,6 +621,6 @@ function registerPlugin() {
 // opencode plugin entry. Every function export is registered exactly once
 // (the loader dedupes same-reference exports); named + default cover both the
 // plugin-directory loader and npm installs.
-export const Thinktime = async () => registerPlugin()
+export const Rubato = async () => registerPlugin()
 
-export default Thinktime
+export default Rubato

@@ -1,7 +1,7 @@
 {
-  "name": "thinktime-opencode",
+  "name": "rubato-opencode",
   "version": "1.0.0",
-  "description": "ThinkTime model-state monitor for opencode: captures Estimate/Thinking/Generating/Done/Error states per model call via plugin hooks (token usage kept in the local archive), estimates duration locally (feature-based kNN), and publishes lean records to EMQX (thinktime/<deviceId>/state) with derived clientId OC-TT-<mac6>.",
+  "description": "Rubato (musical term: stolen time) model-state monitor for opencode: captures Estimate/Thinking/Generating/Done/Error states per model call via plugin hooks (token usage kept in the local archive), estimates duration locally (feature-based kNN), and publishes lean records to EMQX (rubato/<deviceId>/state) with derived clientId OC-TT-<mac6>.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -16,7 +16,7 @@
   "keywords": [
     "opencode",
     "opencode-plugin",
-    "thinktime",
+    "rubato",
     "mqtt"
   ],
   "license": "GPL-3.0"

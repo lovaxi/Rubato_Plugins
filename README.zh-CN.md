@@ -1,15 +1,15 @@
-# Thinktime
+# Rubato
 
 [English](README.md) | 简体中文
 
-Thinktime 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个受支持的编码
-智能体各提供一个 Thinktime 插件，一个插件一个目录。设备固件在
+Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个受支持的编码
+智能体各提供一个 Rubato 插件，一个插件一个目录。设备固件在
 [lovaxi/Thinktime_Device](https://github.com/lovaxi/Thinktime_Device)。
 
-![Thinktime 设备](assets/product.jpg)
+![Rubato 设备](assets/product.jpg)
 
 ```
-模型调用 ──> Thinktime 插件 ──> EMQX 服务器 ──> Thinktime 设备（TFT 屏幕）
+模型调用 ──> Rubato 插件 ──> EMQX 服务器 ──> Rubato 设备（TFT 屏幕）
 ```
 
 | 目录 | 智能体 | 状态 |
@@ -23,7 +23,7 @@ Thinktime 让 AI 的工作状态在桌面实体设备上可见。本仓库为每
 
 ## MQTT 契约
 
-所有插件发布相同的消息到 `thinktime/<deviceId>/state`——每台设备一个主题。
+所有插件发布相同的消息到 `rubato/<deviceId>/state`——每台设备一个主题。
 认证与设备固件一致：username = deviceId（`TT-xxxxxx`），password = 对应
 token。MQTT 3.1.1 over TLS（8883），单条持久连接。
 
@@ -45,7 +45,7 @@ token。MQTT 3.1.1 over TLS（8883），单条持久连接。
 在 DSH 对话里粘贴：
 
 ```text
-Install the Thinktime plugin for DSH from https://github.com/lovaxi/Thinktime_Plugins/dsh
+Install the Rubato plugin for DSH from https://github.com/lovaxi/Rubato_Plugins/dsh
 ```
 
 这就是全部安装步骤。助手会把插件包复制到位并注册，然后提醒你重启。重启后：
@@ -61,7 +61,7 @@ Install the Thinktime plugin for DSH from https://github.com/lovaxi/Thinktime_Pl
 在 opencode 对话里粘贴：
 
 ```text
-Install the Thinktime plugin for OpenCode from https://github.com/lovaxi/Thinktime_Plugins/opencode
+Install the Rubato plugin for OpenCode from https://github.com/lovaxi/Rubato_Plugins/opencode
 ```
 
 这就是全部安装步骤。助手会把插件包复制到位（项目 `.opencode/plugins/` 或

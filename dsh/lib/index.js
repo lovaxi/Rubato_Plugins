@@ -1,8 +1,8 @@
-// ThinkTime — durable model-state monitor for DeepSeek Harness.
+// Rubato (musical term: stolen time) — durable model-state monitor for DeepSeek Harness.
 // Captures every streaming model call in this process (thinking / generating /
-// done) and publishes each state plus the final token usage as MQTT messages
-// to EMQX Cloud (thinktime/<username>/state). Auth mirrors the device firmware
-// (Thinktime.ino): username = deviceId (TT-<mac6>), password = the per-unit
+// done) and publishes each state as MQTT messages
+// to EMQX Cloud (rubato/<username>/state). Auth mirrors the device firmware
+// (rubato.ino): username = deviceId (TT-<mac6>), password = the per-unit
 // token. Loaded as a host plugin from the web profile's cordis.patch.yml, so
 // it auto-starts with dsh.
 //
@@ -27,7 +27,7 @@ const DEFAULTS = {
   clientId: '', // derived: DSH-<username>
   username: '',
   password: '',
-  topic: '', // derived: thinktime/<username>/state
+  topic: '', // derived: rubato/<username>/state
   qos: 1,
 }
 
@@ -44,7 +44,7 @@ const CONFIG_CANDIDATES = [
 function deriveIdentity(cfg) {
   if (cfg.username) {
     if (!cfg.clientId) cfg.clientId = 'DSH-' + cfg.username
-    if (!cfg.topic) cfg.topic = 'thinktime/' + cfg.username + '/state'
+    if (!cfg.topic) cfg.topic = 'rubato/' + cfg.username + '/state'
   }
   if (cfg.enabled === undefined) cfg.enabled = Boolean(cfg.username && cfg.password)
   return cfg
@@ -160,7 +160,7 @@ function predictMs(samples, feat) {
 }
 
 export default {
-  name: 'Thinktime',
+  name: 'Rubato',
   // Hard dependency: the tools service mounts after plain plugins apply, so
   // declare it and let Cordis re-apply once it appears — otherwise both model
   // tools (mqmon_status / mqmon_setup) never register.
@@ -183,11 +183,11 @@ export default {
     // Console policy: configuration reminders ONLY. No per-message or publish
     // chatter — runtime status lives in mqmon_status and the JSONL archive.
     if (cfg.enabled && (!cfg.host || !cfg.topic)) {
-      console.error('[Thinktime] enabled but host/topic missing; fix dsh-mqtt-config.json')
+      console.error('[Rubato] enabled but host/topic missing; fix dsh-mqtt-config.json')
     }
     if (unconfigured) {
       console.error('============================================================')
-      console.error('[Thinktime] SETUP REQUIRED - MQTT credentials not configured')
+      console.error('[Rubato] SETUP REQUIRED - MQTT credentials not configured')
       console.error('  1. open:        ' + (cfg._path || '<plugin root>/dsh-mqtt-config.json'))
       console.error('  2. "username":  the deviceId printed on the device sticker (TT-xxxxxx)')
       console.error('  3. "password":  the token paired with that deviceId')
@@ -234,7 +234,7 @@ export default {
       if (tools) {
         ctx.effect(() => tools.register({
           name: 'mqmon_status',
-          description: 'Report the Thinktime plugin status: MQTT config summary, recent captured model-call records (thinking/generating/done with token usage), and the last MQTT publish outcome.',
+          description: 'Report the Rubato plugin status: MQTT config summary, recent captured model-call records (thinking/generating/done with token usage), and the last MQTT publish outcome.',
           parameters: { type: 'object', properties: {} },
           output: {
             schema: {},
