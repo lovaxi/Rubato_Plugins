@@ -5,8 +5,8 @@
 // Broker is EMQX Cloud Serverless; it needs explicit SNI (servername) or the
 // shared front-end cannot route the tenant.
 // Auth matches the device firmware (rubato.ino): username = deviceId
-// (TT-<mac6>), password = the per-unit token; the harness prefix lives only in
-// the clientId (OC-TT-<mac6> for this opencode plugin).
+// (RUBATO-<mac6>), password = the per-unit token; the harness prefix lives only
+// in the clientId (OC-RUBATO-<mac6> for this opencode plugin).
 import net from 'node:net'
 import tls from 'node:tls'
 
@@ -199,13 +199,13 @@ function publishOnConn(c, topicBuf, payload, qos) {
  * @returns {Promise<{ok: true}>} resolves on PUBACK (qos1) or send (qos0); rejects on failure.
  */
 export async function publishRecord(config, record) {
-  // clientId goes to the broker exactly as configured (OC-TT-<mac6> for this
-  // opencode plugin) — no extra suffix. It differs from both the device's own
-  // clientId (= deviceId) and the other harnesses' clientIds (DSH-TT-<mac6>,
-  // Claw-TT-<mac6>), so concurrent harnesses never kick each other. Note: only
-  // ONE publishing process per clientId may run at a time — the Serverless
-  // front-end rejects a duplicate clientId with CONNACK 2 instead of taking
-  // over the session.
+  // clientId goes to the broker exactly as configured (OC-RUBATO-<mac6> for
+  // this opencode plugin) — no extra suffix. It differs from both the device's
+  // own clientId (= deviceId) and the other harnesses' clientIds (e.g.
+  // DSH-RUBATO-<mac6>), so concurrent harnesses never kick each other. Note:
+  // only ONE publishing process per clientId may run at a time — the
+  // Serverless front-end rejects a duplicate clientId with CONNACK 2 instead
+  // of taking over the session.
   const wire = { ...config, clientId: config.clientId || '' }
   const c = await ensureConn(wire)
   const topicBuf = Buffer.from(config.topic || '', 'utf8')

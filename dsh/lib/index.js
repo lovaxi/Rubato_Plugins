@@ -201,7 +201,7 @@ export default {
       // Local archive: every record lands as one JSON line next to the config
       // file (always, regardless of MQTT enablement) for direct inspection.
       if (cfg._path) {
-        try { appendFileSync(join(dirname(cfg._path), 'rubato-records.jsonl'), JSON.stringify(record) + '\n') } catch { /* best effort */ }
+        try { appendFileSync(join(dirname(cfg._path), 'thinktime-records.jsonl'), JSON.stringify(record) + '\n') } catch { /* best effort */ }
       }
       // Program-judged readiness: publish only when enabled AND credentials
       // are present; otherwise archive locally and keep waiting for setup.
@@ -242,8 +242,11 @@ export default {
           },
           execute: async () => ({
             configured: Boolean(cfg.username && cfg.password),
-            setupHint: cfg.username && cfg.password ? undefined
-              : 'MQTT credentials missing: put username (RUBATO-xxxxxx from the device sticker) and password (token) into dsh-mqtt-config.json and save - the plugin auto-enables once both are filled (next message, no restart needed)',
+            // Lossless-JSON discipline (spec §6): no field may be assigned
+            // undefined — conditional fields are spread-omitted instead.
+            ...(cfg.username && cfg.password ? {} : {
+              setupHint: 'MQTT credentials missing: put username (RUBATO-xxxxxx from the device sticker) and password (token) into dsh-mqtt-config.json and save - the plugin auto-enables once both are filled (next message, no restart needed)',
+            }),
             enabled: cfg.enabled,
             host: cfg.host,
             topic: cfg.topic,
@@ -266,7 +269,7 @@ export default {
     }
 
     if (cfg._path) {
-      try { appendFileSync(join(dirname(cfg._path), 'rubato-records.jsonl'), JSON.stringify(boot) + '\n') } catch { /* best effort */ }
+      try { appendFileSync(join(dirname(cfg._path), 'thinktime-records.jsonl'), JSON.stringify(boot) + '\n') } catch { /* best effort */ }
     }
 
     // Token summary matching the receiver contract: { out, cache, cost? }.
@@ -292,7 +295,7 @@ export default {
     // persisted next to the config file so estimates improve across restarts.
     // Legacy S/M/L bucket files are detected and reset (features不可回填).
     const MAX_SAMPLES = 200
-    const statsPath = () => (cfg._path ? join(dirname(cfg._path), 'rubato-stats.json') : null)
+    const statsPath = () => (cfg._path ? join(dirname(cfg._path), 'thinktime-stats.json') : null)
     let stats = null
     const loadStats = () => {
       if (stats) return stats

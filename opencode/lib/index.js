@@ -11,11 +11,11 @@
 // connection) and archived as a JSON line next to the config file.
 //
 // Broker: EMQX Cloud Serverless (TLS-only). Auth mirrors the device firmware
-// (rubato.ino): username = deviceId (TT-<mac6>), password = the per-unit
+// (rubato.ino): username = deviceId (RUBATO-<mac6>), password = the per-unit
 // token; clientId/topic/enabled are identity-derived, so the config only needs
 // username + password. This port derives clientId as 'OC-' + username, i.e.
-// OC-TT-<mac6> — distinct from the device (TT-<mac6>) and from the other
-// harnesses' clientIds (DSH-TT-<mac6>, Claw-TT-<mac6>), so concurrent
+// OC-RUBATO-<mac6> — distinct from the device (RUBATO-<mac6>) and from the
+// other harnesses' clientIds (e.g. DSH-RUBATO-<mac6>), so concurrent
 // publishing processes never kick each other off the broker.
 //
 // opencode hook mapping (verified against sst/opencode dev, Hooks interface):
@@ -282,7 +282,7 @@ function registerPlugin() {
     console.error('============================================================')
     console.error('[Rubato] SETUP REQUIRED - MQTT credentials not configured')
     console.error('  1. open:        ' + (cfg._path || '<plugin root>/dsh-mqtt-config.json'))
-    console.error('  2. "username":  the deviceId printed on the device sticker (TT-xxxxxx)')
+    console.error('  2. "username":  the deviceId printed on the device sticker (RUBATO-xxxxxx)')
     console.error('  3. "password":  the token paired with that deviceId')
     console.error('  save the file and you are done - the plugin auto-enables once both')
     console.error('  fields are filled (next message, no restart).')
@@ -291,7 +291,7 @@ function registerPlugin() {
 
   const archive = (record) => {
     if (!cfg._path) return
-    try { appendFileSync(join(dirname(cfg._path), 'rubato-records.jsonl'), JSON.stringify(record) + '\n') } catch { /* best effort */ }
+    try { appendFileSync(join(dirname(cfg._path), 'thinktime-records.jsonl'), JSON.stringify(record) + '\n') } catch { /* best effort */ }
   }
 
   const publish = async (record, wire = record) => {
@@ -329,7 +329,7 @@ function registerPlugin() {
   let statsCache = null
   function loadStats() {
     if (statsCache) return statsCache
-    const p = cfg._path ? join(dirname(cfg._path), 'rubato-stats.json') : null
+    const p = cfg._path ? join(dirname(cfg._path), 'thinktime-stats.json') : null
     try { statsCache = JSON.parse(readFileSync(p, 'utf8')) } catch { statsCache = {} }
     for (const key of Object.keys(statsCache)) {
       const entry = statsCache[key]
@@ -341,7 +341,7 @@ function registerPlugin() {
   }
   function saveStats(stats) {
     statsCache = stats
-    const p = cfg._path ? join(dirname(cfg._path), 'rubato-stats.json') : null
+    const p = cfg._path ? join(dirname(cfg._path), 'thinktime-stats.json') : null
     if (!p) return
     try { writeFileSync(p, JSON.stringify(stats), 'utf8') } catch { /* best effort */ }
   }
@@ -437,9 +437,7 @@ function registerPlugin() {
       // prefill on large contexts can delay the first delta by seconds — the
       // device must not trail it.
       publish({ model, state: 'Thinking', ts: r.tStart })
-    } catch (e) {
-      console.error('[Rubato] chat.params handler failed: ' + ((e && e.message) || e))
-    }
+    } catch { /* observation only — console policy: config reminders only */ }
   }
 
   // experimental.chat.messages.transform: the full message list for the
@@ -594,8 +592,11 @@ function registerPlugin() {
         args: {},
         execute: async () => JSON.stringify({
           configured: Boolean(cfg.username && cfg.password),
-          setupHint: cfg.username && cfg.password ? undefined
-            : 'MQTT credentials missing: put username (TT-xxxxxx from the device sticker) and password (token) into dsh-mqtt-config.json and save - the plugin auto-enables once both are filled (next message, no restart needed)',
+          // Lossless-JSON discipline (spec §6): no field may be assigned
+          // undefined — conditional fields are spread-omitted instead.
+          ...(cfg.username && cfg.password ? {} : {
+            setupHint: 'MQTT credentials missing: put username (RUBATO-xxxxxx from the device sticker) and password (token) into dsh-mqtt-config.json and save - the plugin auto-enables once both are filled (next message, no restart needed)',
+          }),
           enabled: cfg.enabled,
           host: cfg.host,
           topic: cfg.topic,

@@ -1,5 +1,5 @@
 {
-  "name": "rubato",
+  "name": "rubato-dsh",
   "version": "1.0.0",
   "description": "Rubato (musical term: stolen time) model-state monitor for DeepSeek Harness: captures thinking/generating/done states per model call, estimates duration locally (feature-based kNN), and publishes to EMQX (rubato/<deviceId>/state). Host-only plugin.",
   "type": "module",
