@@ -8,7 +8,7 @@ Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个
 
 ![Rubato 设备](assets/product.jpg)
 
-![Rubato 设备效果](assets/product.mp4)
+![Rubato 设备效果](https://github.com/user-attachments/assets/32402d91-5818-4a01-8f6a-1bca316787a9)
 
 ```
 模型调用 ──> Rubato 插件 ──> EMQX 服务器 ──> Rubato 设备（TFT 屏幕）
