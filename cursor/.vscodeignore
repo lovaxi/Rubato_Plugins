@@ -1,0 +1,9 @@
+.git/**
+.vscode/**
+node_modules/**
+**/*.vsix
+*.vsix
+dsh-mqtt-config.json
+thinktime-records.jsonl
+thinktime-stats.json
+.smoke/**

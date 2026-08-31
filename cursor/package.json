@@ -1,0 +1,71 @@
+{
+  "name": "rubato-cursor",
+  "displayName": "Rubato",
+  "description": "Rubato (musical term: stolen time) model-state monitor for Cursor: derives AI working state from workspace edit bursts (Estimate/Thinking/Generating/Done), estimates duration locally (feature-based kNN), and publishes lean records to EMQX (rubato/<deviceId>/state) with derived clientId CUR-<username>.",
+  "version": "1.0.0",
+  "publisher": "lovaxi",
+  "license": "GPL-3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lovaxi/Rubato_Plugins",
+    "directory": "cursor"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
+  "main": "./extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "rubato.status",
+        "title": "Rubato: Show Status"
+      },
+      {
+        "command": "rubato.ping",
+        "title": "Rubato: Send Test Cycle to Device"
+      },
+      {
+        "command": "rubato.openConfig",
+        "title": "Rubato: Open Config File"
+      }
+    ],
+    "configuration": {
+      "title": "Rubato",
+      "properties": {
+        "rubato.modelLabel": {
+          "type": "string",
+          "default": "cursor-agent",
+          "description": "Model name carried in MQTT payloads; also the estimator's per-model history key."
+        },
+        "rubato.settleMs": {
+          "type": "number",
+          "default": 6000,
+          "minimum": 1000,
+          "description": "Quiet time (ms) after the last AI-like edit before the burst is closed with Done."
+        },
+        "rubato.minBurstChars": {
+          "type": "number",
+          "default": 12,
+          "minimum": 1,
+          "description": "Inserted+deleted chars above which a single edit counts as AI work (smaller edits count only outside the focused editor)."
+        },
+        "rubato.maxBurstMs": {
+          "type": "number",
+          "default": 600000,
+          "minimum": 10000,
+          "description": "Safety cap (ms): a burst that keeps receiving edits is closed with Done after this long."
+        }
+      }
+    }
+  }
+}

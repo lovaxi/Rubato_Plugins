@@ -22,7 +22,7 @@ model call ──> Rubato plugin ──> EMQX broker ──> Rubato device (TFT 
 | openclaw/ | OpenClaw | planned |
 | codex/ | Codex | planned |
 | claude-code/ | Claude Code | planned |
-| cursor/ | Cursor | planned |
+| [cursor/](cursor/) | Cursor | available |
 | [opencode/](opencode/) | OpenCode | available |
 
 ## MQTT contract
@@ -85,7 +85,57 @@ and reminds you to restart. After the restart:
 
 Save — the plugin auto-enables on the next message; no restart needed.
 
-### OpenClaw / Codex / Claude Code / Cursor
+### Cursor
+
+Cursor is a VS Code fork, so the plugin installs as a VSIX — no build tools
+needed.
+
+**Simplest install — two steps:**
+
+1. Download the extension:
+   [`cursor/rubato-cursor-1.0.0.vsix`](https://github.com/lovaxi/Rubato_Plugins/raw/main/cursor/rubato-cursor-1.0.0.vsix)
+2. In Cursor: Extensions panel → `⋯` menu → **Install from VSIX…** → pick the
+   downloaded file → reload the window. (Drag-and-drop of the `.vsix` onto
+   the Extensions panel works too.)
+
+Prefer the terminal? One line (the `cursor` CLI ships with Cursor):
+
+```powershell
+# Windows (PowerShell)
+curl.exe -L -o rubato-cursor.vsix https://github.com/lovaxi/Rubato_Plugins/raw/main/cursor/rubato-cursor-1.0.0.vsix; cursor --install-extension rubato-cursor.vsix
+```
+
+```bash
+# macOS / Linux
+curl -L -o rubato-cursor.vsix https://github.com/lovaxi/Rubato_Plugins/raw/main/cursor/rubato-cursor-1.0.0.vsix && cursor --install-extension rubato-cursor.vsix
+```
+
+Then configure (once):
+
+1. The console prints a `SETUP REQUIRED` guide and a config template is
+   created automatically next to the plugin (`cursor/dsh-mqtt-config.json` —
+   the same file the other Rubato host plugins read on this machine). Command
+   palette → **Rubato: Open Config File** opens it for you.
+2. Fill the two values from the device sticker — username = deviceId
+   (`RUBATO-xxxxxx`), password = its token — by editing the file, or just tell
+   them to the assistant.
+
+Save — the plugin auto-enables on the next edit burst; no restart needed.
+A device link check lives in the command palette: **Rubato: Send Test Cycle
+to Device**.
+
+<details>
+<summary>Build from source (for development)</summary>
+
+```bash
+git clone https://github.com/lovaxi/Rubato_Plugins.git
+cd Rubato_Plugins/cursor
+npx @vscode/vsce package        # -> rubato-cursor-<version>.vsix
+```
+
+</details>
+
+### OpenClaw / Codex / Claude Code
 
 Planned.
 

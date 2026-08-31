@@ -20,7 +20,7 @@ Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个
 | openclaw/ | OpenClaw | 计划中 |
 | codex/ | Codex | 计划中 |
 | claude-code/ | Claude Code | 计划中 |
-| cursor/ | Cursor | 计划中 |
+| [cursor/](cursor/) | Cursor | 可用 |
 | [opencode/](opencode/) | OpenCode | 可用 |
 
 ## MQTT 契约
@@ -75,7 +75,51 @@ Install the Rubato plugin for OpenCode from https://github.com/lovaxi/Rubato_Plu
 
 保存即完成——插件在下一条消息自动启用，无需重启。
 
-### OpenClaw / Codex / Claude Code / Cursor
+### Cursor
+
+Cursor 是 VS Code 的分支，插件以 VSIX 形式安装——无需任何构建工具。
+
+**最简安装 —— 两步：**
+
+1. 下载扩展：[`cursor/rubato-cursor-1.0.0.vsix`](https://github.com/lovaxi/Rubato_Plugins/raw/main/cursor/rubato-cursor-1.0.0.vsix)
+2. 在 Cursor 中：扩展面板 → `⋯` 菜单 → **从 VSIX 安装…** → 选择下载的文件 →
+   重载窗口。（把 `.vsix` 直接拖进扩展面板也可以。）
+
+喜欢终端？一行搞定（`cursor` 命令随 Cursor 自带）：
+
+```powershell
+# Windows (PowerShell)
+curl.exe -L -o rubato-cursor.vsix https://github.com/lovaxi/Rubato_Plugins/raw/main/cursor/rubato-cursor-1.0.0.vsix; cursor --install-extension rubato-cursor.vsix
+```
+
+```bash
+# macOS / Linux
+curl -L -o rubato-cursor.vsix https://github.com/lovaxi/Rubato_Plugins/raw/main/cursor/rubato-cursor-1.0.0.vsix && cursor --install-extension rubato-cursor.vsix
+```
+
+然后配置一次：
+
+1. 控制台会打印 `SETUP REQUIRED` 指南，并自动在插件旁生成配置模板
+   （`cursor/dsh-mqtt-config.json` —— 与本机其他 Rubato 宿主插件读的是
+   同一个文件）。命令面板 → **Rubato: Open Config File** 可直接打开。
+2. 把设备贴纸上的两个值填进去——username = deviceId（`RUBATO-xxxxxx`），
+   password = 对应 token——可以自己编辑文件，或直接告诉助手。
+
+保存即完成——插件在下一次编辑突发时自动启用，无需重启。命令面板里的
+**Rubato: Send Test Cycle to Device** 可做设备链路检查。
+
+<details>
+<summary>从源码构建（开发者）</summary>
+
+```bash
+git clone https://github.com/lovaxi/Rubato_Plugins.git
+cd Rubato_Plugins/cursor
+npx @vscode/vsce package        # 生成 rubato-cursor-<version>.vsix
+```
+
+</details>
+
+### OpenClaw / Codex / Claude Code
 
 计划中。
 
