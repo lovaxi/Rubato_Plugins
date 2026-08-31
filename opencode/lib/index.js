@@ -291,7 +291,7 @@ function registerPlugin() {
 
   const archive = (record) => {
     if (!cfg._path) return
-    try { appendFileSync(join(dirname(cfg._path), 'thinktime-records.jsonl'), JSON.stringify(record) + '\n') } catch { /* best effort */ }
+    try { appendFileSync(join(dirname(cfg._path), 'rubato-records.jsonl'), JSON.stringify(record) + '\n') } catch { /* best effort */ }
   }
 
   const publish = async (record, wire = record) => {
@@ -329,7 +329,7 @@ function registerPlugin() {
   let statsCache = null
   function loadStats() {
     if (statsCache) return statsCache
-    const p = cfg._path ? join(dirname(cfg._path), 'thinktime-stats.json') : null
+    const p = cfg._path ? join(dirname(cfg._path), 'rubato-stats.json') : null
     try { statsCache = JSON.parse(readFileSync(p, 'utf8')) } catch { statsCache = {} }
     for (const key of Object.keys(statsCache)) {
       const entry = statsCache[key]
@@ -341,7 +341,7 @@ function registerPlugin() {
   }
   function saveStats(stats) {
     statsCache = stats
-    const p = cfg._path ? join(dirname(cfg._path), 'thinktime-stats.json') : null
+    const p = cfg._path ? join(dirname(cfg._path), 'rubato-stats.json') : null
     if (!p) return
     try { writeFileSync(p, JSON.stringify(stats), 'utf8') } catch { /* best effort */ }
   }

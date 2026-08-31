@@ -5,7 +5,7 @@ English | [简体中文](README.zh-CN.md)
 Rubato makes your AI's working state visible — on a physical desk device.
 This repository hosts a Rubato plugin for every supported coding agent,
 one directory each. The device firmware lives at
-[RubatoDevice](https://github.com/lovaxi/Rubato_Device).
+[Rubato_Device](https://github.com/lovaxi/Rubato_Device).
 
 ![Rubato device](assets/product.jpg)
 

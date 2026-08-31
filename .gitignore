@@ -1,7 +1,7 @@
 # Runtime artifacts (never publish credentials or usage data)
 dsh-mqtt-config.json
-thinktime-records.jsonl
-thinktime-stats.json
+rubato-records.jsonl
+rubato-stats.json
 .smoke/
 node_modules/
 *.log
