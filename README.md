@@ -7,6 +7,8 @@ This repository hosts a Thinktime plugin for every supported coding agent,
 one directory each. The device firmware lives at
 [Thinktime_Device](https://github.com/lovaxi/Thinktime_Device).
 
+![Thinktime device](assets/product.jpg)
+
 
 
 ```

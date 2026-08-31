@@ -6,6 +6,8 @@ Thinktime 让 AI 的工作状态在桌面实体设备上可见。本仓库为每
 智能体各提供一个 Thinktime 插件，一个插件一个目录。设备固件在
 [lovaxi/Thinktime_Device](https://github.com/lovaxi/Thinktime_Device)。
 
+![Thinktime 设备](assets/product.jpg)
+
 ```
 模型调用 ──> Thinktime 插件 ──> EMQX 服务器 ──> Thinktime 设备（TFT 屏幕）
 ```
