@@ -124,6 +124,22 @@ Save — the plugin auto-enables on the next edit burst; no restart needed.
 A device link check lives in the command palette: **Rubato: Send Test Cycle
 to Device**.
 
+**How it works** — Cursor exposes no public API for its AI chat, so the
+plugin watches what the AI provably does to the workspace: rapid,
+non-keystroke document edits (Tab completions, Cmd/Ctrl+K, chat Apply, agent
+diffs) form an *edit burst* that maps onto the contract sequence above;
+small keystroke-scale edits in the focused editor read as human typing and
+are ignored.
+
+Commands (command palette): **Rubato: Show Status** · **Rubato: Send Test
+Cycle to Device** · **Rubato: Open Config File**.
+
+Settings: `rubato.modelLabel` (`cursor-agent` — payload model name and
+estimator history key), `rubato.settleMs` (`6000` — quiet time in ms that
+closes a burst with Done), `rubato.minBurstChars` (`12` — inserted+deleted
+chars for an edit to count as AI work in the focused editor),
+`rubato.maxBurstMs` (`600000` — safety cap).
+
 <details>
 <summary>Build from source (for development)</summary>
 

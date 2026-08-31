@@ -108,6 +108,19 @@ curl -L -o rubato-cursor.vsix https://github.com/lovaxi/Rubato_Plugins/raw/main/
 保存即完成——插件在下一次编辑突发时自动启用，无需重启。命令面板里的
 **Rubato: Send Test Cycle to Device** 可做设备链路检查。
 
+**工作原理** —— Cursor 没有公开其 AI 对话的 API，插件观察 AI 对工作区确实
+产生的改动：快速、非逐键的文档编辑（Tab 补全、Cmd/Ctrl+K、对话 Apply、
+agent 多文件 diff）组成一次*编辑突发*，映射为上面的消息序列；焦点编辑器里
+逐键级别的小改动视为人类输入，忽略。
+
+命令（命令面板）：**Rubato: Show Status** · **Rubato: Send Test Cycle to
+Device** · **Rubato: Open Config File**。
+
+设置：`rubato.modelLabel`（`cursor-agent`，负载模型名 + 估算历史键）、
+`rubato.settleMs`（`6000`，突发以 Done 收尾的静默毫秒数）、
+`rubato.minBurstChars`（`12`，焦点编辑器内单次编辑计入 AI 工作的字符阈值）、
+`rubato.maxBurstMs`（`600000`，安全上限）。
+
 <details>
 <summary>从源码构建（开发者）</summary>
 
