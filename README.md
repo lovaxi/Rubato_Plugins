@@ -9,6 +9,7 @@ one directory each. The device firmware lives at
 
 ![Rubato device](assets/product.jpg)
 
+![Rubato device in action](assets/product.mp4)
 
 
 ```
