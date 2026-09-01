@@ -41,8 +41,9 @@ persistent connection.
 
 The device shows the model name and a breathing orb that changes color per
 phase — slow cream while thinking, faster ice-blue while generating, a green
-flash when done. When the estimate predicts a long run during working hours,
-the device shows a full-screen health reminder (time to drink water / rest).
+flash when done. When the estimate predicts a long run (estSec ≥ 30), the
+device shows a full-screen health reminder mid-task — at most one every
+30 minutes (time to drink water / rest).
 
 ## Install
 
