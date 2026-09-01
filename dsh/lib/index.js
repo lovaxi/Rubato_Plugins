@@ -9,13 +9,30 @@
 // First-run UX: when no config file exists anywhere, a self-documenting
 // template is dropped next to the plugin and a setup guide is printed at boot;
 // the mqmon_status tool reports configured:false until username+password land.
-import { readFileSync, writeFileSync, appendFileSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, appendFileSync, existsSync, renameSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { publishRecord } from './mqtt.js'
 
 // Plugin root (lib/..): template + default config home; travels with installs.
 const PLUGIN_ROOT = dirname(dirname(fileURLToPath(import.meta.url)))
+
+// One-time data migration: the local archive and calibration files were
+// renamed from thinktime-* to rubato-*. Move any legacy files (once per
+// directory) so history and calibration samples survive the rebrand.
+const MIGRATED_DIRS = new Set()
+const migrateLegacyFiles = (dir) => {
+  if (MIGRATED_DIRS.has(dir)) return
+  MIGRATED_DIRS.add(dir)
+  for (const [newName, oldName] of [
+    ['rubato-records.jsonl', 'thinktime-records.jsonl'],
+    ['rubato-stats.json', 'thinktime-stats.json'],
+  ]) {
+    try {
+      if (!existsSync(join(dir, newName)) && existsSync(join(dir, oldName))) renameSync(join(dir, oldName), join(dir, newName))
+    } catch { /* best effort */ }
+  }
+}
 
 const DEFAULTS = {
   // enabled is NOT a user setting: it is derived on every load — credentials
@@ -201,7 +218,9 @@ export default {
       // Local archive: every record lands as one JSON line next to the config
       // file (always, regardless of MQTT enablement) for direct inspection.
       if (cfg._path) {
-        try { appendFileSync(join(dirname(cfg._path), 'thinktime-records.jsonl'), JSON.stringify(record) + '\n') } catch { /* best effort */ }
+        const dir = dirname(cfg._path)
+        migrateLegacyFiles(dir)
+        try { appendFileSync(join(dir, 'rubato-records.jsonl'), JSON.stringify(record) + '\n') } catch { /* best effort */ }
       }
       // Program-judged readiness: publish only when enabled AND credentials
       // are present; otherwise archive locally and keep waiting for setup.
@@ -269,7 +288,9 @@ export default {
     }
 
     if (cfg._path) {
-      try { appendFileSync(join(dirname(cfg._path), 'thinktime-records.jsonl'), JSON.stringify(boot) + '\n') } catch { /* best effort */ }
+      const dir = dirname(cfg._path)
+      migrateLegacyFiles(dir)
+      try { appendFileSync(join(dir, 'rubato-records.jsonl'), JSON.stringify(boot) + '\n') } catch { /* best effort */ }
     }
 
     // Token summary matching the receiver contract: { out, cache, cost? }.
@@ -295,7 +316,12 @@ export default {
     // persisted next to the config file so estimates improve across restarts.
     // Legacy S/M/L bucket files are detected and reset (features不可回填).
     const MAX_SAMPLES = 200
-    const statsPath = () => (cfg._path ? join(dirname(cfg._path), 'thinktime-stats.json') : null)
+    const statsPath = () => {
+      if (!cfg._path) return null
+      const dir = dirname(cfg._path)
+      migrateLegacyFiles(dir)
+      return join(dir, 'rubato-stats.json')
+    }
     let stats = null
     const loadStats = () => {
       if (stats) return stats

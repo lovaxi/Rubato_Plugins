@@ -94,7 +94,7 @@
 
 ### 3.3 样本存储
 
-- 文件：`thinktime-stats.json`，与 config 同目录。
+- 文件：`rubato-stats.json`，与 config 同目录。
 - 结构：`{ [model]: { samples: [...] } }`；样本字段 `{ c, l, f, v, fl, n, e, ms, est, o, t }`——`ms` 实际耗时、`est` 流启动时的预测值（**档案自带预测 vs 实际对照**）、`o` 输出 token 数、`t` 时间戳。
 - 上限 200 条，超出删最旧。
 - 旧版 S/M/L 分桶结构检测到即重置（特征不可回填）。
@@ -111,8 +111,9 @@
 
 ## 5. 本地归档
 
-- `thinktime-records.jsonl`（与 config 同目录）：每条消息一行 JSON + 每次进程启动一行 `_boot`（含 config 路径、enabled、host、topic、toolRegistered——诊断工具注册失败的唯一现场）。**无论 MQTT 是否启用都落盘**。
-- `thinktime-stats.json`：§3.3 校准样本。
+- `rubato-records.jsonl`（与 config 同目录）：每条消息一行 JSON + 每次进程启动一行 `_boot`（含 config 路径、enabled、host、topic、toolRegistered——诊断工具注册失败的唯一现场）。**无论 MQTT 是否启用都落盘**。
+- `rubato-stats.json`：§3.3 校准样本。
+- **旧名迁移**：历史文件名为 `thinktime-records.jsonl` / `thinktime-stats.json`；插件在同目录首次触达数据文件时自动把旧名重命名为新名（新名已存在则跳过），历史记录与校准样本无缝延续。
 - 两文件都在 `.gitignore` 里，永不进仓库。
 
 ## 6. 模型工具 `mqmon_status`
@@ -151,7 +152,7 @@
 3. 对 lib 的任何落盘操作之后，三验：`node --check` 通过、源码中能匹配到中文动词正则、`import` 后 default 导出为对象。
 4. config 文件禁止 BOM（插件用 `readFileSync(utf8)` + `JSON.parse`，BOM 会让 parse 抛错）。
 5. 工具输出禁止 undefined 字段（§6）。
-6. `.gitignore` 必须排除：`dsh-mqtt-config.json`、`thinktime-records.jsonl`、`thinktime-stats.json`、`.smoke/`、`node_modules/`。**凭据与数据永不进仓库**。
+6. `.gitignore` 必须排除：`dsh-mqtt-config.json`、`rubato-records.jsonl`、`rubato-stats.json`、`.smoke/`、`node_modules/`。**凭据与数据永不进仓库**。
 
 ## 10. 测试（冒烟模式）
 
@@ -172,7 +173,7 @@
 | 导出符号 | `Rubato`（named + default 双导出，覆盖目录加载与 npm 安装两种路径） |
 | console 前缀 | `[Rubato]` |
 | 目录 | 仓库根每个智能体一个目录：`dsh/`、`opencode/`、…；每目录 = 完整插件包（package.json + lib/） |
-| 数据文件名 | `thinktime-records.jsonl` / `thinktime-stats.json`（刻意保留旧名：校准数据连续性） |
+| 数据文件名 | `rubato-records.jsonl` / `rubato-stats.json`（旧名 `thinktime-*` 首次触达自动迁移，见 §5） |
 
 ## 12. 新插件移植清单
 
