@@ -67,6 +67,7 @@
 5. **Done 的 wire 契约精简**：`{ model, state, ts }`。token 用量只写入本地归档与状态工具，设备用不上（明确决策：wire 去除 tokens 字段）。
 6. **Error 之后必须补 Done**：设备只在收到 done 时退出呼吸态，否则永远卡住。
 7. **归档与 wire 分离**：`publish(record, wire = record)`——归档永远收完整对象，MQTT 只发精简对象。Done 是唯一当前需要分离的消息。
+8. **用户点停止 / 流被提前关闭**：宿主以生成器 `return()` 方式关闭包装流——**不是异常**（catch 不触发，循环后的代码不执行）。必须用 `finally` 兜底：凡既非正常完成（`doneSent` 已置位）也非 `tool-calls` 中间步骤的关闭，一律补发精简 Done（归档记 `interrupted: true`），且**不回填校准**（被截断的时长不是有效样本）。缺此兜底设备将永远卡在呼吸态。
 
 ## 3. 时长预估器（kNN，零 token）
 
@@ -130,6 +131,7 @@
 - Generating 在首个输出片段；
 - 中间步骤不发 Done；回合结束才 Done（宿主事件流若在回合中途产生"结束"信号，必须去抖并在下一信号到达时取消——参见 dsh 对 `tool-calls` finish 的处理）；
 - Error + 补 Done；
+- 用户点停止 / 流提前关闭 → `finally` 兜底补 Done（§2.4 第 8 条）；
 - wire 精简 / 归档完整分离；
 - clientId 前缀登记（§2.2）、config 查找顺序、首启 UX、console 政策、归档、工具、预估器全部照抄 dsh。
 

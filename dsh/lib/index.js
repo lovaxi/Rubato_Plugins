@@ -341,6 +341,7 @@ export default {
       let generatingAt = null
       let usage = null
       let finishReason = null
+      let doneSent = false
       return (async function* () {
         try {
           for await (const chunk of stream) {
@@ -361,6 +362,7 @@ export default {
           const tokens = tokensFor(usage)
           const doneRecord = { model, state: 'Done', ts: Date.now(), ...(tokens ? { tokens } : {}) }
           publish(doneRecord, { model, state: 'Done', ts: doneRecord.ts })
+          doneSent = true
           // Backfill calibration: store this call's features, real duration
           // (ms) and the estimate made at stream start (est) — so the stats
           // file itself documents predicted-vs-actual per sample. Capped list.
@@ -380,7 +382,21 @@ export default {
           publish({ model, state: 'Error', ts: Date.now(), error: String(err && err.message || err) })
           // Un-stick the device: it only exits the breathing state on done.
           publish({ model, state: 'Done', ts: Date.now() })
+          doneSent = true
           throw err
+        } finally {
+          // User stop button / early stream teardown: the harness closes this
+          // generator mid-flight (a generator return, not an exception), so
+          // neither the post-loop Done nor the catch above runs and the device
+          // would stay in the breathing state forever. Any closure that is
+          // neither a completed turn (doneSent) nor an intermediate tool-calls
+          // step means the turn is over for the device — emit the lean Done
+          // (archive notes the interruption). Calibration backfill is
+          // intentionally skipped: an interrupted duration is not a sample.
+          if (!doneSent && finishReason !== 'tool-calls') {
+            const ts = Date.now()
+            publish({ model, state: 'Done', ts, interrupted: true }, { model, state: 'Done', ts })
+          }
         }
       })()
     })
