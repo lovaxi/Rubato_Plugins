@@ -5,6 +5,8 @@
 Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个受支持的编码
 智能体各提供一个 Rubato 插件，一个插件一个目录。设备固件在
 [lovaxi/Rubato_Device](https://github.com/lovaxi/Rubato_Device)。
+设备整机已在
+[Tindie](https://www.tindie.com/products/beartificialintelligence/rubato-retro-mac-ai-desk-companion/) 正式发售。
 
 ![Rubato 设备](assets/product.jpg)
 

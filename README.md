@@ -6,6 +6,8 @@ Rubato makes your AI's working state visible — on a physical desk device.
 This repository hosts a Rubato plugin for every supported coding agent,
 one directory each. The device firmware lives at
 [Rubato_Device](https://github.com/lovaxi/Rubato_Device).
+The desk device itself is available now on
+[Tindie](https://www.tindie.com/products/beartificialintelligence/rubato-retro-mac-ai-desk-companion/) — the official store.
 
 ![Rubato device](assets/product.jpg)
 
