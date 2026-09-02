@@ -36,7 +36,7 @@ persistent connection.
 
 | Message | Payload | Notes |
 |---|---|---|
-| `Estimate` | `{ model, state, ts, estSec }` | predicted duration in seconds |
+| `Estimate` | `{ model, state, ts, estSec? }` | predicted duration in seconds — carried by the DSH plugin only (user-side plugins omit it) |
 | `Thinking` | `{ model, state, ts }` | first reasoning chunk |
 | `Generating` | `{ model, state, ts }` | first answer/tool chunk |
 | `Done` | `{ model, state, ts }` | intermediate tool-call steps do not emit Done |

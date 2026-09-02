@@ -33,7 +33,7 @@ token。MQTT 3.1.1 over TLS（8883），单条持久连接。
 
 | 消息 | 载荷 | 说明 |
 |---|---|---|
-| `Estimate` | `{ model, state, ts, estSec }` | 预估时长（秒） |
+| `Estimate` | `{ model, state, ts, estSec? }` | 预估时长（秒）——仅 dsh 插件携带（用户端插件不带该字段） |
 | `Thinking` | `{ model, state, ts }` | 首个思考片段 |
 | `Generating` | `{ model, state, ts }` | 首个回答/工具片段 |
 | `Done` | `{ model, state, ts }` | 中间工具调用步骤不发送 Done |
