@@ -48,13 +48,12 @@ const DEFAULTS = {
   qos: 1,
 }
 
-// Config file lookup order: the host process cwd, then the plugin root
-// (config travels with the install). First existing file wins; edits take
-// effect on the next record (hot reload).
-const CONFIG_CANDIDATES = [
-  join(process.cwd(), 'dsh-mqtt-config.json'),
-  join(PLUGIN_ROOT, 'dsh-mqtt-config.json'),
-]
+// Generic config name shared by every Rubato plugin (cwd-first lookup lets
+// several harnesses share one file). The dsh-prefixed legacy name is renamed
+// in place on first touch so existing installs keep their credentials.
+const CONFIG_NAME = 'rubato-mqtt-config.json'
+const CONFIG_LEGACY = 'dsh-mqtt-config.json'
+const CONFIG_DIRS = [process.cwd(), PLUGIN_ROOT]
 
 // Fill the identity-derived fields the user never has to configure, and
 // derive enablement: credentials present = on; explicit enabled:false = off.
@@ -67,8 +66,21 @@ function deriveIdentity(cfg) {
   return cfg
 }
 
+// One-time per-directory config migration: adopt the generic name, keep the
+// credentials. If the rename is blocked (locked file, permissions), the legacy
+// path still works.
+function resolveConfigPath(dir) {
+  const fresh = join(dir, CONFIG_NAME)
+  if (existsSync(fresh)) return fresh
+  const legacy = join(dir, CONFIG_LEGACY)
+  if (!existsSync(legacy)) return null
+  try { renameSync(legacy, fresh); return fresh } catch { return legacy }
+}
+
 function loadConfig() {
-  for (const p of CONFIG_CANDIDATES) {
+  for (const dir of CONFIG_DIRS) {
+    const p = resolveConfigPath(dir)
+    if (!p) continue
     try {
       // Tolerate // comment lines: the auto-generated template documents
       // itself with them; plain JSON.parse would reject them.
@@ -98,7 +110,7 @@ const TEMPLATE_TEXT = `{
 `
 
 function createConfigTemplate() {
-  const p = join(PLUGIN_ROOT, 'dsh-mqtt-config.json')
+  const p = join(PLUGIN_ROOT, CONFIG_NAME)
   if (!existsSync(p)) {
     try { writeFileSync(p, TEMPLATE_TEXT, 'utf8') } catch { /* best effort */ }
   }
@@ -205,12 +217,12 @@ export default {
     // Console policy: configuration reminders ONLY. No per-message or publish
     // chatter — runtime status lives in mqmon_status and the JSONL archive.
     if (cfg.enabled && (!cfg.host || !cfg.topic)) {
-      console.error('[Rubato] enabled but host/topic missing; fix dsh-mqtt-config.json')
+      console.error('[Rubato] enabled but host/topic missing; fix rubato-mqtt-config.json')
     }
     if (unconfigured) {
       console.error('============================================================')
       console.error('[Rubato] SETUP REQUIRED - MQTT credentials not configured')
-      console.error('  1. open:        ' + (cfg._path || '<plugin root>/dsh-mqtt-config.json'))
+      console.error('  1. open:        ' + (cfg._path || '<plugin root>/rubato-mqtt-config.json'))
       console.error('  2. "username":  the deviceId printed on the device sticker (RUBATO-xxxxxx)')
       console.error('  3. "password":  the token paired with that deviceId')
       console.error('  save the file and you are done - the plugin auto-enables once both')
@@ -269,7 +281,7 @@ export default {
             // Lossless-JSON discipline (spec §6): no field may be assigned
             // undefined — conditional fields are spread-omitted instead.
             ...(cfg.username && cfg.password ? {} : {
-              setupHint: 'MQTT credentials missing: put username (RUBATO-xxxxxx from the device sticker) and password (token) into dsh-mqtt-config.json and save - the plugin auto-enables once both are filled (next message, no restart needed)',
+              setupHint: 'MQTT credentials missing: put username (RUBATO-xxxxxx from the device sticker) and password (token) into rubato-mqtt-config.json and save - the plugin auto-enables once both are filled (next message, no restart needed)',
             }),
             enabled: cfg.enabled,
             host: cfg.host,

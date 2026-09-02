@@ -102,7 +102,7 @@
 
 ## 4. 配置与首启体验
 
-- **查找顺序**：宿主进程 cwd 的 `dsh-mqtt-config.json` 优先，其次插件根目录。cwd 优先的设计让同一台机器上多个宿主共享一份配置。
+- **查找顺序**：宿主进程 cwd 的 `rubato-mqtt-config.json` 优先，其次插件根目录。cwd 优先的设计让同一台机器上多个宿主共享一份配置。**通用文件名**——所有 Rubato 插件共用 `rubato-mqtt-config.json`，不是各智能体前缀命名；旧名 `dsh-mqtt-config.json` 在同目录首次查找时自动改名迁移（新名已存在则跳过；改名失败则沿用旧路径），凭据无缝保留。
 - **热加载**：每条消息发布前重新读取——改完即生效，无需重启。
 - **enabled 是派生值**：`username && password` 填了 = 开；文件里显式写 `"enabled": false` 是人工关闭开关。不提供任何 setup 工具，不做交互式配置。
 - **模板**：纯 JSON `{"username":"","password":""}`，**模板里不写注释**（JSON 标准不含注释；加载器对 `//` 行的剥离只是容忍，不是邀请）。
@@ -154,7 +154,7 @@
 3. 对 lib 的任何落盘操作之后，三验：`node --check` 通过、源码中能匹配到中文动词正则、`import` 后 default 导出为对象。
 4. config 文件禁止 BOM（插件用 `readFileSync(utf8)` + `JSON.parse`，BOM 会让 parse 抛错）。
 5. 工具输出禁止 undefined 字段（§6，仅 dsh——用户端插件不注册模型工具）。
-6. `.gitignore` 必须排除：`dsh-mqtt-config.json`、`rubato-records.jsonl`、`rubato-stats.json`、`.smoke/`、`node_modules/`。**凭据与数据永不进仓库**。
+6. `.gitignore` 必须排除：`rubato-mqtt-config.json`（及旧名 `dsh-mqtt-config.json`）、`rubato-records.jsonl`、`rubato-stats.json`、`.smoke/`、`node_modules/`。**凭据与数据永不进仓库**。
 
 ## 10. 测试（冒烟模式）
 
