@@ -127,7 +127,12 @@ function extractFeatures(options) {
     if (typeof m.content === 'string') text = m.content
     else if (Array.isArray(m.content)) text = m.content.map((p) => (p && typeof p.text === 'string' ? p.text : '')).join(' ')
     ctxChars += text.length
-    if (m.role === 'user') last = text
+    // The last user message CARRYING REAL TEXT. Tool-loop continuations arrive
+    // as role 'user' with no text parts and must not shadow the human ask that
+    // actually drives this turn — without the `&& text` guard, l/f/v/fl were
+    // empty on ~75% of calls (every continuation step) and the estimator ran
+    // on starved features.
+    if (m.role === 'user' && text) last = text
   }
   return {
     c: ctxChars,
