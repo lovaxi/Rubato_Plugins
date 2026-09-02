@@ -116,12 +116,12 @@
 - **旧名迁移**：历史文件名为 `thinktime-records.jsonl` / `thinktime-stats.json`；插件在同目录首次触达数据文件时自动把旧名重命名为新名（新名已存在则跳过），历史记录与校准样本无缝延续。
 - 两文件都在 `.gitignore` 里，永不进仓库。
 
-## 6. 模型工具 `mqmon_status`
+## 6. 模型工具 `mqmon_status`（**仅 dsh**）
 
-- 注册为模型可见工具（宿主 tools 服务），报告：configured、enabled、host、topic、qos、configPath、published/failed 计数、lastPublish、recentRecords。
+- mqmon_status 是给 **AI 智能体**用的诊断面板：注册进宿主 tools 服务，模型可在对话中直接调用，回答"凭据配了吗 / 往哪发 / 发了多少 / 最近一次成功吗"。dsh 运行在 AI 开发环境里，这类工具有用；**其他插件运行在用户端，尽量简洁——不注册任何模型工具**，诊断全部走本地归档（§5）与 `_boot` 行。
 - **输出必须是无损 JSON**：任何字段都不允许赋 `undefined`（条件性字段用展开省略或置 null）。无损序列化器遇到 undefined 值会直接拒绝整个输出——这是真实踩过的坑。
 - 工具注册失败不得杀死插件：失败详情写进 `_boot` 行。
-- 宿主若提供 tools 服务，插件必须声明 `inject: ['tools']` 等待其挂载（dsh 的根因修复：不声明则 apply 早于服务挂载，工具永远注册不上）。
+- 宿主若提供 tools 服务，注册模型工具的插件必须声明 `inject: ['tools']` 等待其挂载（dsh 的根因修复：不声明则 apply 早于服务挂载，工具永远注册不上）——**此条仅适用于注册了模型工具的插件**。
 
 ## 7. 各智能体的差异面
 
@@ -134,7 +134,7 @@
 - Error + 补 Done；
 - 用户点停止 / 流提前关闭 → `finally` 兜底补 Done（§2.4 第 8 条）；
 - wire 精简 / 归档完整分离；
-- clientId 前缀登记（§2.2）、config 查找顺序、首启 UX、console 政策、归档、工具全部照抄 dsh；**预估器暂不移植**（§3：待 dsh 测试完成后统一添加）。
+- clientId 前缀登记（§2.2）、config 查找顺序、首启 UX、console 政策、归档全部照抄 dsh；**模型工具仅 dsh**（§6——用户端插件零模型接口，越简越好）；**预估器暂不移植**（§3：待 dsh 测试完成后统一添加）。
 
 钩子层之外的一切代码（身份派生、发布器、模板、归档）直接以 `dsh/lib` 为底本改造成本最低、出错率最低。
 
@@ -151,12 +151,12 @@
 2. 写文件一律用 node `fs` 或字节精确手段（`git checkout <sha> -- path` + 二进制 `Copy-Item`）。
 3. 对 lib 的任何落盘操作之后，三验：`node --check` 通过、源码中能匹配到中文动词正则、`import` 后 default 导出为对象。
 4. config 文件禁止 BOM（插件用 `readFileSync(utf8)` + `JSON.parse`，BOM 会让 parse 抛错）。
-5. 工具输出禁止 undefined 字段（§6）。
+5. 工具输出禁止 undefined 字段（§6，仅 dsh——用户端插件不注册模型工具）。
 6. `.gitignore` 必须排除：`dsh-mqtt-config.json`、`rubato-records.jsonl`、`rubato-stats.json`、`.smoke/`、`node_modules/`。**凭据与数据永不进仓库**。
 
 ## 10. 测试（冒烟模式）
 
-`tools/dsh-smoke-test.mjs` 是标准范式，新插件照此各写一份（预估/校准相关断言仅适用于 dsh；其他插件的冒烟不含 §3 内容）：
+`tools/dsh-smoke-test.mjs` 是标准范式，新插件照此各写一份（预估/校准与工具注册相关断言仅适用于 dsh；其他插件的冒烟不含 §3/§6 内容）：
 
 - 伪造三条流：① 极小上下文 + `tool-calls` 结束（只发 Estimate，无回填）；② 大上下文 + 正常结束（先验预估，Done + 回填真实样本）；③ 同样再来一次（从已存样本得到校准预估，必须小于先验）。
 - 自包含 config（写入 `.smoke/`，故意带一行 `//` 注释验证加载容忍），`enabled: false`，**全程不需要真实代理**。
@@ -182,7 +182,7 @@
 - [ ] clientId 前缀在本规范 §2.2 表登记，派生 `<前缀>-<username>`
 - [ ] topic 派生 `rubato/<username>/state`；config 查找 cwd 优先
 - [ ] 首启 UX：模板 + SETUP 指南 + console 只留配置提醒
-- [ ] `mqmon_status` 注册 + 无损 JSON 自检 + `inject`（若宿主有 tools 服务概念）
+- [ ] 模型工具：**仅 dsh** 注册 `mqmon_status`（§6）；其他插件零模型接口、不注册任何工具
 - [ ] 归档落盘路径跟随 config 所在目录（stats 校准仅 dsh 暂有，验证后随预估器一起添加）
 - [ ] 冒烟测试按 §10 范式落地并跑通（exit 0）
 - [ ] 根 README 双语表格加行 + 安装小节（一行粘贴式提示语，指向本仓库 `<harness>/` 子目录）
