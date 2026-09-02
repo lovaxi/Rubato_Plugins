@@ -12,7 +12,7 @@
 模型调用 ──> Rubato 插件（宿主进程内） ──> EMQX 代理 ──> Rubato 设备（TFT 屏）
 ```
 
-- **插件**：寄生在智能体宿主进程内，观察每一次流式模型调用，产出状态消息并发布 MQTT；同时把全部消息落盘归档、维护时长预估的校准样本。
+- **插件**：寄生在智能体宿主进程内，观察每一次流式模型调用，产出状态消息并发布 MQTT，并把全部消息落盘归档。时长预估与校准样本（§3）是 **dsh 插件独有**的能力，其他插件不实现。
 - **设备**：只订阅 `rubato/<deviceId>/state` 一个主题，按消息渲染；**Estimate 是纯元数据，永不驱动设备状态机**。
 - **职责边界**：插件负责"何时发什么"；设备负责"如何显示"。健康提醒的调度与冷却在设备侧，插件不做任何健康逻辑。
 
@@ -52,7 +52,7 @@
 
 | state | 载荷 | 触发点 |
 |---|---|---|
-| `Estimate` | `{ model, state, ts, estSec }` | 每次模型调用启动时、**任何 chunk 之前**（含中间工具步骤的每次调用）；`estSec` 为预估秒数，保留 1 位小数 |
+| `Estimate` | `{ model, state, ts, estSec? }` | 每次模型调用启动时、**任何 chunk 之前**（含中间工具步骤的每次调用）；`estSec` 为预估秒数（1 位小数），**仅 dsh 提供**（§3）——其他插件的 Estimate 一律不带该字段 |
 | `Thinking` | `{ model, state, ts }` | 流启动时（见 2.4） |
 | `Generating` | `{ model, state, ts }` | 首个 `text-delta` 或 `tool-call-delta` |
 | `Done` | `{ model, state, ts }` | 回合真正结束（见 2.4）；**wire 精简，tokens 只进本地归档** |
@@ -60,7 +60,7 @@
 
 ### 2.4 时序语义（最容易做错的部分，逐条对齐 dsh）
 
-1. **Estimate 先于一切**：在流启动瞬间、第一个 chunk 到达前发布。它来自零 token 的本地预估（§3）。
+1. **Estimate 先于一切**：在流启动瞬间、第一个 chunk 到达前发布（其他插件发不带 estSec 的 Estimate；dsh 的来自零 token 的本地预估，§3）。
 2. **Thinking 在流启动时发布，不是在首个 reasoning chunk**：大上下文预填充会把首个 delta 拖迟数秒，设备不能落后于真实节奏。
 3. **`tool-calls` 结束 = 中间步骤**：循环会执行工具并再次调用模型，该流**不发 Done**（只发该步骤自己的 Estimate/Thinking/Generating）。Done 只属于回合结束。
 4. **多步工具循环 = 多轮完整消息**：每个步骤都有自己的 Estimate——这正是设备端需要健康提醒冷却的原因（§8）。
@@ -69,9 +69,9 @@
 7. **归档与 wire 分离**：`publish(record, wire = record)`——归档永远收完整对象，MQTT 只发精简对象。Done 是唯一当前需要分离的消息。
 8. **用户点停止 / 流被提前关闭**：宿主以生成器 `return()` 方式关闭包装流——**不是异常**（catch 不触发，循环后的代码不执行）。必须用 `finally` 兜底：凡既非正常完成（`doneSent` 已置位）也非 `tool-calls` 中间步骤的关闭，一律补发精简 Done（归档记 `interrupted: true`），且**不回填校准**（被截断的时长不是有效样本）。缺此兜底设备将永远卡在呼吸态。
 
-## 3. 时长预估器（kNN，零 token）
+## 3. 时长预估器（kNN，零 token）——**dsh 独有，其他插件不得实现**
 
-预估在每次调用启动时完成，不消耗任何 token，随样本积累自动变准。
+预估在每次调用启动时完成，不消耗任何 token，随样本积累自动变准。**预估与校准是 dsh 插件的专属能力**：其他插件不维护校准样本、不输出 estSec；设备健康提醒（§8）随之只在 dsh 会话中触发。
 
 ### 3.1 特征（从请求免费提取）
 
@@ -112,7 +112,7 @@
 ## 5. 本地归档
 
 - `rubato-records.jsonl`（与 config 同目录）：每条消息一行 JSON + 每次进程启动一行 `_boot`（含 config 路径、enabled、host、topic、toolRegistered——诊断工具注册失败的唯一现场）。**无论 MQTT 是否启用都落盘**。
-- `rubato-stats.json`：§3.3 校准样本。
+- `rubato-stats.json`：§3.3 校准样本（**dsh 独有**，其他插件无此文件）。
 - **旧名迁移**：历史文件名为 `thinktime-records.jsonl` / `thinktime-stats.json`；插件在同目录首次触达数据文件时自动把旧名重命名为新名（新名已存在则跳过），历史记录与校准样本无缝延续。
 - 两文件都在 `.gitignore` 里，永不进仓库。
 
@@ -127,20 +127,20 @@
 
 移植新宿主时，**只有"钩子映射层"允许不同**——即"宿主的什么事件对应 §2.4 的哪个消息"。以下语义必须逐条保持，无例外：
 
-- Estimate 在请求发出前、零 token、含中间步骤；
+- Estimate 在请求发出前（dsh 的带 estSec，其他插件不带）、含中间步骤；
 - Thinking 在流启动（不等首个 delta）；
 - Generating 在首个输出片段；
 - 中间步骤不发 Done；回合结束才 Done（宿主事件流若在回合中途产生"结束"信号，必须去抖并在下一信号到达时取消——参见 dsh 对 `tool-calls` finish 的处理）；
 - Error + 补 Done；
 - 用户点停止 / 流提前关闭 → `finally` 兜底补 Done（§2.4 第 8 条）；
 - wire 精简 / 归档完整分离；
-- clientId 前缀登记（§2.2）、config 查找顺序、首启 UX、console 政策、归档、工具、预估器全部照抄 dsh。
+- clientId 前缀登记（§2.2）、config 查找顺序、首启 UX、console 政策、归档、工具全部照抄 dsh；**预估器不在移植范围**（§3，dsh 独有）。
 
-钩子层之外的一切代码（预估器、身份派生、发布器、模板、归档）直接以 `dsh/lib` 为底本改造成本最低、出错率最低。
+钩子层之外的一切代码（身份派生、发布器、模板、归档）直接以 `dsh/lib` 为底本改造成本最低、出错率最低。
 
 ## 8. 健康提醒策略（设备侧职责，插件零逻辑）
 
-- 设备收到 `Estimate` 且 `estSec >= 30` 时，在任务运行的等待期显示健康全屏（喝水/休息）。
+- 设备收到 `Estimate` 且 `estSec >= 30` 时，在任务运行的等待期显示健康全屏（喝水/休息）。estSec 仅 dsh 提供（§3），因此健康提醒只在 dsh 会话中触发。
 - **冷却**：两次健康全屏之间 ≥ 30 分钟——既防提醒风暴（历史数据：48% 的调用预估 ≥30s，重负载日会触发 70 次），也防多步工具循环在同一回合内连翻屏。
 - **无上下班时间概念**：有 AI 活动本质上就是没在休息。
 - 插件对健康逻辑零参与：不判断、不节流、不加字段。契约不变。
@@ -156,7 +156,7 @@
 
 ## 10. 测试（冒烟模式）
 
-`tools/dsh-smoke-test.mjs` 是标准范式，新插件照此各写一份：
+`tools/dsh-smoke-test.mjs` 是标准范式，新插件照此各写一份（预估/校准相关断言仅适用于 dsh；其他插件的冒烟不含 §3 内容）：
 
 - 伪造三条流：① 极小上下文 + `tool-calls` 结束（只发 Estimate，无回填）；② 大上下文 + 正常结束（先验预估，Done + 回填真实样本）；③ 同样再来一次（从已存样本得到校准预估，必须小于先验）。
 - 自包含 config（写入 `.smoke/`，故意带一行 `//` 注释验证加载容忍），`enabled: false`，**全程不需要真实代理**。
@@ -173,7 +173,7 @@
 | 导出符号 | `Rubato`（named + default 双导出，覆盖目录加载与 npm 安装两种路径） |
 | console 前缀 | `[Rubato]` |
 | 目录 | 仓库根每个智能体一个目录：`dsh/`、`opencode/`、…；每目录 = 完整插件包（package.json + lib/） |
-| 数据文件名 | `rubato-records.jsonl` / `rubato-stats.json`（旧名 `thinktime-*` 首次触达自动迁移，见 §5） |
+| 数据文件名 | `rubato-records.jsonl`（所有插件）/ `rubato-stats.json`（仅 dsh）；旧名 `thinktime-*` 首次触达自动迁移，见 §5 |
 
 ## 12. 新插件移植清单
 
@@ -183,7 +183,7 @@
 - [ ] topic 派生 `rubato/<username>/state`；config 查找 cwd 优先
 - [ ] 首启 UX：模板 + SETUP 指南 + console 只留配置提醒
 - [ ] `mqmon_status` 注册 + 无损 JSON 自检 + `inject`（若宿主有 tools 服务概念）
-- [ ] 归档与 stats 落盘路径跟随 config 所在目录
+- [ ] 归档落盘路径跟随 config 所在目录（stats 校准仅 dsh，其他插件无）
 - [ ] 冒烟测试按 §10 范式落地并跑通（exit 0）
 - [ ] 根 README 双语表格加行 + 安装小节（一行粘贴式提示语，指向本仓库 `<harness>/` 子目录）
 - [ ] `.gitignore` 核对；确认仓库无凭据、无数据、无本机绝对路径
