@@ -27,7 +27,7 @@
 //                                 + lean Done
 //   event session.error        -> dedup guard
 //   event session.idle         -> terminal lean Done (the finally-equivalent)
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, existsSync, renameSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { publishRecord } from './mqtt.js'
 
@@ -49,14 +49,22 @@ const DEFAULTS = {
   qos: 1,
 }
 
-// Config file lookup order: the opencode process cwd (shares the other
-// harnesses' config when several run on this machine), then the plugin root
-// (config travels with the install). First existing file wins; edits take
-// effect on the next record (hot reload).
-const CONFIG_CANDIDATES = [
-  join(process.cwd(), 'dsh-mqtt-config.json'),
-  join(PLUGIN_DIR, 'dsh-mqtt-config.json'),
-]
+// Generic config name shared by every Rubato plugin (cwd-first lookup lets
+// several harnesses share one file). The dsh-prefixed legacy name is renamed
+// in place on first touch so existing installs keep their credentials; if the
+// rename is blocked (locked file, permissions), the legacy path still works.
+const CONFIG_NAME = 'rubato-mqtt-config.json'
+const CONFIG_LEGACY = 'dsh-mqtt-config.json'
+const CONFIG_DIRS = [process.cwd(), PLUGIN_DIR]
+
+// One-time per-directory config migration (same semantics as dsh).
+function resolveConfigPath(dir) {
+  const fresh = join(dir, CONFIG_NAME)
+  if (existsSync(fresh)) return fresh
+  const legacy = join(dir, CONFIG_LEGACY)
+  if (!existsSync(legacy)) return null
+  try { renameSync(legacy, fresh); return fresh } catch { return legacy }
+}
 
 // Fill the identity-derived fields the user never has to configure, and
 // derive enablement: credentials present = on; explicit enabled:false = off.
@@ -69,25 +77,35 @@ function deriveIdentity(cfg) {
   return cfg
 }
 
-function loadConfig(overrides) {
-  const candidates = overrides && overrides.configPath
-    ? [overrides.configPath, ...CONFIG_CANDIDATES]
-    : CONFIG_CANDIDATES
-  for (const p of candidates) {
-    try {
-      // Tolerate // comment lines: the auto-generated template documents
-      // itself with them; plain JSON.parse would reject them.
-      const text = readFileSync(p, 'utf8')
-        .split(/\r?\n/)
-        .filter((line) => !line.trim().startsWith('//'))
-        .join('\n')
-      const parsed = JSON.parse(text)
-      if (parsed && typeof parsed === 'object') {
-        return deriveIdentity({ ...DEFAULTS, ...parsed, ...(overrides || {}), _path: p })
-      }
-    } catch {
-      // try next candidate
+function parseConfigFile(p, overrides) {
+  try {
+    // Tolerate // comment lines: the auto-generated template documents
+    // itself with them; plain JSON.parse would reject them.
+    const text = readFileSync(p, 'utf8')
+      .split(/\r?\n/)
+      .filter((line) => !line.trim().startsWith('//'))
+      .join('\n')
+    const parsed = JSON.parse(text)
+    if (parsed && typeof parsed === 'object') {
+      return deriveIdentity({ ...DEFAULTS, ...parsed, ...(overrides || {}), _path: p })
     }
+  } catch {
+    // try next candidate
+  }
+  return null
+}
+
+function loadConfig(overrides) {
+  // Explicit path (tests / exotic setups): read directly, no migration.
+  if (overrides && overrides.configPath) {
+    const direct = parseConfigFile(overrides.configPath, overrides)
+    if (direct) return direct
+  }
+  for (const dir of CONFIG_DIRS) {
+    const p = resolveConfigPath(dir)
+    if (!p) continue
+    const cfg = parseConfigFile(p, overrides)
+    if (cfg) return cfg
   }
   return deriveIdentity({ ...DEFAULTS, ...(overrides || {}), _path: null })
 }
@@ -103,7 +121,7 @@ const TEMPLATE_TEXT = `{
 `
 
 function createConfigTemplate() {
-  const p = join(PLUGIN_DIR, 'dsh-mqtt-config.json')
+  const p = join(PLUGIN_DIR, CONFIG_NAME)
   if (!existsSync(p)) {
     try { writeFileSync(p, TEMPLATE_TEXT, 'utf8') } catch { /* best effort */ }
   }
@@ -147,12 +165,12 @@ function registerPlugin() {
   // chatter (spec §4) — user-side plugins have no archive or status tool, so
   // there is nothing else to print.
   if (cfg.enabled && (!cfg.host || !cfg.topic)) {
-    console.error('[Rubato] enabled but host/topic missing; fix dsh-mqtt-config.json')
+    console.error('[Rubato] enabled but host/topic missing; fix rubato-mqtt-config.json')
   }
   if (unconfigured) {
     console.error('============================================================')
     console.error('[Rubato] SETUP REQUIRED - MQTT credentials not configured')
-    console.error('  1. open:        ' + (cfg._path || '<plugin root>/dsh-mqtt-config.json'))
+    console.error('  1. open:        ' + (cfg._path || '<plugin root>/rubato-mqtt-config.json'))
     console.error('  2. "username":  the deviceId printed on the device sticker (RUBATO-xxxxxx)')
     console.error('  3. "password":  the token paired with that deviceId')
     console.error('  save the file and you are done - the plugin auto-enables once both')
