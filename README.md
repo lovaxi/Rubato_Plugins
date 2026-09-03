@@ -22,7 +22,7 @@ model call ──> Rubato plugin ──> EMQX broker ──> Rubato device (TFT 
 |---|---|---|
 | [dsh/](dsh/) | DeepSeek Harness | available |
 | [openclaw/](openclaw/) | OpenClaw | available |
-| codex/ | Codex | planned |
+| [codex/](codex/) | Codex | available — untested |
 | claude-code/ | Claude Code | planned |
 | [cursor/](cursor/) | Cursor | available — untested |
 | [opencode/](opencode/) | OpenCode | available |
@@ -185,7 +185,48 @@ Save — the plugin auto-enables on the next message; no restart needed.
 OpenClaw's typed hooks have no first-delta event, so `Generating` is not
 emitted; the device stays in its thinking breath until `Done`.
 
-### Codex / Claude Code
+### Codex
+
+Codex CLI has no host-plugin API, so the Codex plugin runs two cooperating
+processes instead of one in-process hook:
+
+1. **Watcher** (primary) — tails `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`
+   and maps the event stream to the message set above (`task_started` →
+   Estimate + Thinking; first `agent_message`/tool activity → Generating;
+   `task_complete` → lean Done; `turn_aborted` → lean Done without Error,
+   an aborted turn is a user stop, not a failure). Files already on disk at
+   startup are fast-forwarded silently.
+2. **`notify` hook** (fallback) — Codex invokes it on `agent-turn-complete`.
+   While the watcher is alive it does nothing; if the watcher is dead it
+   publishes the un-sticking Done itself and revives the watcher.
+
+Install (Windows, PowerShell — clones the repo and wires everything):
+
+```powershell
+git clone https://github.com/lovaxi/Rubato_Plugins.git
+cd Rubato_Plugins/codex
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+The installer creates the config template (`codex/rubato-mqtt-config.json` —
+the same generic file every Rubato host on this machine reads; the legacy
+`dsh-mqtt-config.json` is migrated in place on first lookup), adds
+`notify = ["node", '<repo>\codex\lib\notify.js']` to `~/.codex/config.toml`
+(backup written first; an existing notify hook is left untouched), and
+registers + starts a hidden logon Scheduled Task `RubatoCodexWatcher` running
+the watcher.
+
+Then fill the two values from the device sticker — username = deviceId
+(`RUBATO-xxxxxx`), password = its token — by editing the file. Save — the
+plugin auto-enables on the next record; no restart needed.
+
+> **⚠️ Untested against real Codex**: the rollout-event mapping is verified by
+> an offline smoke test only (no Codex subscription was needed to write it, but
+> none was available to run it either). If you try it, reports are welcome at
+> [Issues](https://github.com/lovaxi/Rubato_Plugins/issues) — missed states, a
+> device stuck in the breathing orb, wrong model names.
+
+### Claude Code
 
 Planned.
 

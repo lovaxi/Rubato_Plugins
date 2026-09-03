@@ -20,7 +20,7 @@ Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个
 |---|---|---|
 | [dsh/](dsh/) | DeepSeek Harness | 可用 |
 | [openclaw/](openclaw/) | OpenClaw | 可用 |
-| codex/ | Codex | 计划中 |
+| [codex/](codex/) | Codex | 可用——未经实测 |
 | claude-code/ | Claude Code | 计划中 |
 | [cursor/](cursor/) | Cursor | 可用——未经实测 |
 | [opencode/](opencode/) | OpenCode | 可用 |
@@ -160,7 +160,45 @@ Install the Rubato plugin for OpenClaw from https://github.com/lovaxi/Rubato_Plu
 保存即完成——插件在下一条消息自动启用，无需重启。OpenClaw 类型化钩子没有
 首个增量事件，因此不发送 `Generating`；设备保持思考呼吸态直到 `Done`。
 
-### Codex / Claude Code
+### Codex
+
+Codex CLI 没有宿主插件 API，Codex 插件改为两个协作进程，而不是单个进程内
+钩子：
+
+1. **Watcher（主通道）** —— 跟踪
+   `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl`，把事件流映射为上面的消息
+   集（`task_started` → Estimate + Thinking；首个 `agent_message`/工具活动 →
+   Generating；`task_complete` → 精简 Done；`turn_aborted` → 只发精简 Done
+   不发 Error——中止是用户停止，不是失败）。启动时磁盘上已有的日志会被
+   静默快进。
+2. **`notify` 钩子（兜底）** —— Codex 在 `agent-turn-complete` 时调用它。
+   watcher 存活时它不动作；watcher 挂掉时它自己补发解卡 Done，并唤醒
+   watcher。
+
+安装（Windows PowerShell——克隆仓库并完成全部接线）：
+
+```powershell
+git clone https://github.com/lovaxi/Rubato_Plugins.git
+cd Rubato_Plugins/codex
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+安装器会生成配置模板（`codex/rubato-mqtt-config.json`——与本机所有 Rubato
+宿主插件读的是同一个通用文件；旧名 `dsh-mqtt-config.json` 首次查找时自动
+改名迁移）、向 `~/.codex/config.toml` 追加
+`notify = ["node", '<仓库路径>\codex\lib\notify.js']`（先备份；已有 notify
+钩子则保持不动），并注册 + 启动隐藏的开机登录计划任务 `RubatoCodexWatcher`
+运行 watcher。
+
+然后把设备贴纸上的两个值填进去——username = deviceId（`RUBATO-xxxxxx`），
+password = 对应 token——保存即完成，插件在下一条记录自动启用，无需重启。
+
+> **⚠️ 未经真实 Codex 实测**：rollout 事件映射仅通过离线冒烟测试验证（写它
+> 不需要 Codex 订阅，跑它也没得跑）。如果你实测了，欢迎到
+> [Issues](https://github.com/lovaxi/Rubato_Plugins/issues) 反馈：状态漏报、
+> 设备卡在呼吸态、模型名不对等。
+
+### Claude Code
 
 计划中。
 

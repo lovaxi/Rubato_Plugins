@@ -1,0 +1,19 @@
+{
+  "name": "rubato-codex",
+  "version": "2.0.0",
+  "description": "Rubato (musical term: stolen time) model-state monitor for OpenAI Codex CLI: tails rollout session logs and the notify hook to capture Estimate/Thinking/Generating/Done/Error states per turn, and publishes the lean user-side records to EMQX (rubato/<deviceId>/state) with derived clientId Codex-RUBATO-<mac6>.",
+  "type": "module",
+  "main": "lib/watcher.js",
+  "scripts": {
+    "watch": "node lib/watcher.js",
+    "notify": "node lib/notify.js",
+    "smoke": "node ../tools/codex-smoke-test.mjs"
+  },
+  "keywords": [
+    "codex",
+    "codex-cli",
+    "rubato",
+    "mqtt"
+  ],
+  "license": "GPL-3.0"
+}
