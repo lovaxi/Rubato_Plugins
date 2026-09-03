@@ -1,12 +1,7 @@
-﻿{
+{
   "id": "rubato",
   "name": "Rubato",
-  "description": "Rubato model-state monitor: captures every model call (Estimate/Thinking/Done/Error + token usage) and publishes each state as an MQTT message to the desk device.",
-  "contracts": {
-    "tools": [
-      "mqmon_status"
-    ]
-  },
+  "description": "Rubato model-state monitor: captures every model call (Estimate/Thinking/Done/Error) and publishes each state as an MQTT message to the desk device.",
   "activation": {
     "onStartup": true
   },
