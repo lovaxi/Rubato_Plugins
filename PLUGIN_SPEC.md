@@ -40,8 +40,9 @@
 | DeepSeek Harness | `DSH-` | 在用 |
 | OpenCode | `OC-` | 在用 |
 | Cursor | `CUR-` | 在用 |
-| OpenClaw | `Claw-Rubato-`（作用于 mac6：`Claw-Rubato-<mac6>`） | 在用 |
-| Claude Code / Codex | 待定，**新前缀必须先登记到本表** | 计划中 |
+| OpenClaw | `Claw-`（`Claw-` + username = `Claw-RUBATO-<mac6>`） | 在用 |
+| Claude Code | `CC-Rubato-`（作用于 mac6：`CC-Rubato-<mac6>`） | 在用 |
+| Codex | 待定，**新前缀必须先登记到本表** | 计划中 |
 
 - 前缀存在的理由：与设备自身的 clientId（= deviceId）以及其他智能体的 clientId 互不相同，**并发运行的多个宿主进程互不踢线**。
 - EMQX Serverless 对重复 clientId 返回 CONNACK 2（拒绝接管会话），因此同一 clientId 的两次连接是硬错误，不是"挤掉旧连接"。

@@ -46,7 +46,7 @@ const DEFAULTS = {
   host: 'ubaa35f0.ala.cn-shenzhen.emqxsl.cn', // EMQX Cloud Serverless, TLS-only
   port: 8883,
   tls: true,
-  clientId: '', // derived: Claw-Rubato-<mac6> (mac6 = hex part of RUBATO-<mac6>)
+  clientId: '', // derived: Claw-<username> (= Claw-RUBATO-<mac6>)
   username: '',
   password: '',
   topic: '', // derived: rubato/<username>/state
@@ -83,13 +83,10 @@ function configCandidates(overrides) {
 // derive enablement: credentials present = on; explicit enabled:false = off.
 function deriveIdentity(cfg) {
   if (cfg.username) {
-    if (!cfg.clientId) {
-      // mac6 = the hex part of the deviceId (RUBATO-<mac6>; legacy units
-      // TT-<mac6>). A username following neither convention is used verbatim.
-      const u = cfg.username
-      const mac6 = u.startsWith('RUBATO-') ? u.slice(7) : u.startsWith('TT-') ? u.slice(3) : u
-      cfg.clientId = 'Claw-Rubato-' + mac6
-    }
+    // Standard formula (spec §2.2): <prefix>-<username> — 'Claw-' + the
+    // deviceId-as-username (RUBATO-<mac6>) = Claw-RUBATO-<mac6>. It differs
+    // from the device's own clientId (= deviceId) and every other agent's.
+    if (!cfg.clientId) cfg.clientId = 'Claw-' + cfg.username
     if (!cfg.topic) cfg.topic = 'rubato/' + cfg.username + '/state'
   }
   if (cfg.enabled === undefined) cfg.enabled = Boolean(cfg.username && cfg.password)
