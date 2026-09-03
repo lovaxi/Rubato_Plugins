@@ -23,7 +23,7 @@ model call ──> Rubato plugin ──> EMQX broker ──> Rubato device (TFT 
 | [dsh/](dsh/) | DeepSeek Harness | available |
 | [openclaw/](openclaw/) | OpenClaw | available |
 | [codex/](codex/) | Codex | available |
-| claude-code/ | Claude Code | planned |
+| [claude-code/](claude-code/) | Claude Code | available |
 | [cursor/](cursor/) | Cursor | available — untested |
 | [opencode/](opencode/) | OpenCode | available |
 
@@ -234,7 +234,32 @@ plugin auto-enables on the next record; no restart needed.
 
 ### Claude Code
 
-Planned.
+In a Claude Code session:
+
+```text
+/plugin marketplace add lovaxi/Rubato_Plugins
+/plugin install rubato@rubato-plugins
+```
+
+Already have the repo cloned? `/plugin marketplace add ./Rubato_Plugins/claude-code`, then `/plugin install rubato@rubato`.
+
+After install:
+
+1. The first prompt shows a one-time `SETUP REQUIRED` warning and a config
+   template is created automatically.
+2. Fill the two values from the device sticker — username = deviceId
+   (`RUBATO-xxxxxx`), password = its token — under `/plugin` → rubato →
+   options (they are exported to the plugin's daemon and win over the file),
+   or edit the file named in the notice.
+
+Save — the plugin auto-enables on the next prompt; no restart needed.
+
+Claude Code has no in-process plugin API, so the plugin runs one detached
+daemon that owns the single persistent MQTT connection (clientId
+`CC-RUBATO-<mac6>`); hooks drop events into a spool in the OS temp dir, and
+the plugin keeps zero persistent local files except the config. Offline
+smoke test: `node claude-code/tools/cc-smoke-test.mjs` — spins up a local
+fake MQTT broker and asserts the real wire traffic.
 
 ## License
 

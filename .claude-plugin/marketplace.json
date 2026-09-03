@@ -1,0 +1,18 @@
+{
+  "name": "rubato-plugins",
+  "owner": {
+    "name": "lovaxi",
+    "url": "https://github.com/lovaxi"
+  },
+  "plugins": [
+    {
+      "name": "rubato",
+      "source": "./claude-code",
+      "description": "Rubato model-state monitor for Claude Code: publishes the lean Estimate/Thinking/Generating/Done set of every turn to the Rubato desk device over MQTT (EMQX).",
+      "version": "1.0.0",
+      "author": {
+        "name": "lovaxi"
+      }
+    }
+  ]
+}

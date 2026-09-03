@@ -1,0 +1,26 @@
+{
+  "name": "rubato",
+  "version": "1.0.0",
+  "description": "Rubato model-state monitor for Claude Code: publishes the lean Estimate/Thinking/Generating/Done set of every turn to the Rubato desk device over MQTT (EMQX).",
+  "author": {
+    "name": "lovaxi",
+    "url": "https://github.com/lovaxi"
+  },
+  "homepage": "https://github.com/lovaxi/Rubato_Plugins/tree/main/claude-code",
+  "repository": "https://github.com/lovaxi/Rubato_Plugins",
+  "license": "GPL-3.0",
+  "keywords": ["rubato", "mqtt", "emqx", "desk-device", "status", "iot"],
+  "userConfig": {
+    "username": {
+      "type": "string",
+      "title": "Device ID (MQTT username)",
+      "description": "The deviceId printed on the device sticker, e.g. RUBATO-43216c"
+    },
+    "password": {
+      "type": "string",
+      "title": "Device token (MQTT password)",
+      "description": "The token paired with that deviceId",
+      "sensitive": true
+    }
+  }
+}

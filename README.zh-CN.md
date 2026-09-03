@@ -21,7 +21,7 @@ Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个
 | [dsh/](dsh/) | DeepSeek Harness | 可用 |
 | [openclaw/](openclaw/) | OpenClaw | 可用 |
 | [codex/](codex/) | Codex | 可用 |
-| claude-code/ | Claude Code | 计划中 |
+| [claude-code/](claude-code/) | Claude Code | 可用 |
 | [cursor/](cursor/) | Cursor | 可用——未经实测 |
 | [opencode/](opencode/) | OpenCode | 可用 |
 
@@ -205,7 +205,30 @@ password = 对应 token——保存即完成，插件在下一条记录自动启
 
 ### Claude Code
 
-计划中。
+在 Claude Code 会话里：
+
+```text
+/plugin marketplace add lovaxi/Rubato_Plugins
+/plugin install rubato@rubato-plugins
+```
+
+已经克隆了仓库？`/plugin marketplace add ./Rubato_Plugins/claude-code`，然后
+`/plugin install rubato@rubato`。
+
+安装后：
+
+1. 第一条 prompt 会出现一次性的 `SETUP REQUIRED` 提示，并自动生成配置模板。
+2. 把设备贴纸上的两个值填进去——username = deviceId（`RUBATO-xxxxxx`），
+   password = 对应 token——在 `/plugin` → rubato → 选项里填（会导出给插件的
+   守护进程，优先于配置文件），或直接编辑提示里指出的文件。
+
+保存即完成——插件在下一条 prompt 自动启用，无需重启。
+
+Claude Code 没有进程内插件 API，插件由一个常驻守护进程独享单条持久 MQTT
+连接（clientId `CC-RUBATO-<mac6>`）；钩子把事件丢进系统临时目录的 spool，
+除配置外插件零持久本地文件。离线冒烟测试：
+`node claude-code/tools/cc-smoke-test.mjs`——本地起一个假 MQTT broker，
+断言真实 wire 流量。
 
 ## 许可证
 
