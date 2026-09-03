@@ -44,7 +44,8 @@ function closeTurn(sess) {
 // Apply one parsed rollout line. Returns an ordered list of actions for the
 // watcher; during fast-forward the watcher ignores 'emit'/'open-turn'/'end'
 // events but the session state still advances.
-// Actions: {kind:'open-turn'} | {kind:'emit', state:'Generating'}
+// Actions: {kind:'open-turn'} | {kind:'model-known'}
+//        | {kind:'emit', state:'Generating'}
 //        | {kind:'end', how:'complete'|'interrupted'|'error', detail?}
 export function applyLine(sess, line, now) {
   const actions = []
@@ -62,6 +63,11 @@ export function applyLine(sess, line, now) {
     if (typeof p.model === 'string' && p.model) sess.model = p.model
     const e = p.effort || p.model_reasoning_effort || (p.reasoning && p.reasoning.effort)
     if (e) sess.effort = String(e)
+    // Codex >= 0.153 writes turn_context AFTER task_started (just before the
+    // first model call), so the watcher may hold an open turn still waiting
+    // for the model name — signal it (watcher flushes the stashed
+    // Estimate/Thinking with the real model, see flushActions pendingOpen).
+    if (typeof p.model === 'string' && p.model) actions.push({ kind: 'model-known' })
     return actions
   }
 
@@ -72,6 +78,9 @@ export function applyLine(sess, line, now) {
     if (it.type === 'message') {
       const text = extractUserText(it.content)
       if (it.role === 'user' && !isInjectedUserText(text)) sess.lastUser = text
+      // 0.153 has no agent_message events: an assistant message response_item
+      // IS the first answer chunk -> Generating.
+      if (it.role === 'assistant') noteGenerating(sess, actions)
     } else if (it.type === 'function_call' || it.type === 'custom_tool_call' || it.type === 'local_shell_call' || it.type === 'web_search_call' || it.type === 'tool_call') {
       noteGenerating(sess, actions)
     }
@@ -106,6 +115,15 @@ export function applyLine(sess, line, now) {
       case 'agent_message_content_delta':
         noteGenerating(sess, actions)
         break
+      case 'item_completed': {
+        // 0.153 emits item_completed per finished item; the first assistant
+        // answer or tool item means real generation started.
+        const t = p.item && p.item.type
+        if (t === 'agent_message' || t === 'function_call' || t === 'custom_tool_call' || t === 'local_shell_call' || t === 'web_search_call' || t === 'mcp_tool_call') {
+          noteGenerating(sess, actions)
+        }
+        break
+      }
       // agent_reasoning* needs no action: the turn already opened as Thinking.
       case 'token_count': {
         // Lean wire keeps no token usage; only the model fallback is read.

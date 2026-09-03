@@ -34,6 +34,12 @@ import { publishRecord, dropConnection } from './mqtt.js'
 const WATCHDOG_MS = 15 * 60 * 1000 // open-turn unstuck threshold
 const HEARTBEAT_TTL_MS = 15000 // notify hook considers the watcher alive below this age
 
+// Diagnostics gate: RUBATO_DEBUG=1 enables one-line-per-event tracing on
+// stderr. Off by default — the spec's console policy (config reminders only)
+// applies to normal operation.
+const DEBUG = process.env.RUBATO_DEBUG === '1'
+const dbg = (msg) => { if (DEBUG) console.error('[Rubato:debug] ' + msg) }
+
 export function heartbeatPath() {
   return join(os.tmpdir(), 'rubato-codex-watcher.json')
 }
@@ -165,24 +171,46 @@ export function startWatcher(opts = {}) {
     return actions
   }
 
+  function publishOpenPair(entry, ts, model) {
+    // Estimate first (spec §2.4.1) — user-side plugins publish it WITHOUT
+    // estSec (§2.3); the device treats Estimate as pure metadata. Thinking
+    // fires at turn start (not on the first reasoning delta): prefill on
+    // large contexts can delay the first delta by seconds — the device must
+    // not trail it.
+    void publish({ model, state: 'Estimate', ts })
+    void publish({ model, state: 'Thinking', ts })
+  }
+
   function flushActions(path, actions) {
     const entry = files.get(path)
     if (!entry) return
     for (const a of actions) {
       const model = entry.sess.model || 'unknown'
       if (a.kind === 'open-turn') {
-        // Estimate first (spec §2.4.1) — user-side plugins publish it WITHOUT
-        // estSec (§2.3); the device treats Estimate as pure metadata. Thinking
-        // fires at turn start (not on the first reasoning delta): prefill on
-        // large contexts can delay the first delta by seconds — the device
-        // must not trail it.
         entry.openSince = Date.now()
         const ts = entry.sess.turn ? entry.sess.turn.tStart : Date.now()
-        void publish({ model, state: 'Estimate', ts })
-        void publish({ model, state: 'Thinking', ts })
+        if (entry.sess.model) {
+          publishOpenPair(entry, ts, model)
+        } else {
+          // Codex >= 0.153 announces the model in turn_context AFTER
+          // task_started: stash the opening pair and flush on 'model-known'
+          // (or at turn end) so the device never sees model "unknown".
+          entry.pendingOpen = { ts }
+        }
+      } else if (a.kind === 'model-known') {
+        if (entry.pendingOpen) {
+          publishOpenPair(entry, entry.pendingOpen.ts, model)
+          entry.pendingOpen = null
+        }
       } else if (a.kind === 'emit') {
         void publish({ model, state: a.state, ts: Date.now() })
       } else if (a.kind === 'end') {
+        if (entry.pendingOpen) {
+          // Turn ended before the model ever became known (rare): still emit
+          // the opening pair so the state sequence stays ordered.
+          publishOpenPair(entry, entry.pendingOpen.ts, model)
+          entry.pendingOpen = null
+        }
         if (a.how === 'error') {
           void publish({ model, state: 'Error', ts: Date.now(), error: a.detail || 'error' })
         }
@@ -203,13 +231,20 @@ export function startWatcher(opts = {}) {
       seen.add(path)
       let entry = files.get(path)
       if (!entry) {
-        entry = { offset: 0, sess: createSessionState(), openSince: 0, pendingFrom: null, pendingEof: 0 }
+        entry = { offset: 0, sess: createSessionState(), openSince: 0, pendingFrom: null, pendingEof: 0, pendingOpen: null }
         files.set(path, entry)
       }
       // Files already on disk at startup (or first seen grown files) are
       // fast-forwarded silently; their unterminated tails are final.
       const fast = fastForwardNewFiles && entry.offset === 0 && !entry.live
+      if (DEBUG && !fast && entry.offset === 0 && !entry.live) dbg('new live file: ' + path)
       const actions = readActions(path, entry, { fast, forceFinal: fast })
+      if (fast && entry.sess.turn) {
+        // The fast-forwarded session ended mid-turn (Codex was killed): arm
+        // the watchdog from NOW so the stale turn still un-sticks the device.
+        entry.openSince = Date.now()
+      }
+      if (DEBUG && actions.length) dbg('actions from ' + path.split(/[\\/]/).pop() + ': ' + JSON.stringify(actions))
       if (!fast && actions.length) flushActions(path, actions)
       if (!fast) entry.live = true
     }
@@ -232,8 +267,16 @@ export function startWatcher(opts = {}) {
   const publish = injectPublish || (async (record) => {
     // Hot reload per record (spec §4). User-side: drop when unconfigured —
     // no archive, no local fallback (spec §5).
-    if (!cfg.enabled || !cfg.username || !cfg.password) return
-    try { await publishRecord(cfg, record) } catch { /* observation only — console policy */ }
+    if (!cfg.enabled || !cfg.username || !cfg.password) {
+      dbg('drop (unconfigured): ' + JSON.stringify(record))
+      return
+    }
+    try {
+      await publishRecord(cfg, record)
+      dbg('published: ' + JSON.stringify(record))
+    } catch (e) {
+      dbg('publish FAILED (' + (e && e.message) + '): ' + JSON.stringify(record))
+    }
   })
 
   beat()
