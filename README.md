@@ -22,7 +22,7 @@ model call ──> Rubato plugin ──> EMQX broker ──> Rubato device (TFT 
 |---|---|---|
 | [dsh/](dsh/) | DeepSeek Harness | available |
 | [openclaw/](openclaw/) | OpenClaw | available |
-| [codex/](codex/) | Codex | available — untested |
+| [codex/](codex/) | Codex | available |
 | claude-code/ | Claude Code | planned |
 | [cursor/](cursor/) | Cursor | available — untested |
 | [opencode/](opencode/) | OpenCode | available |
@@ -227,11 +227,10 @@ Then fill the two values from the device sticker — username = deviceId
 (`RUBATO-xxxxxx`), password = its token — by editing the file. Save — the
 plugin auto-enables on the next record; no restart needed.
 
-> **⚠️ Untested against real Codex**: the rollout-event mapping is verified by
-> an offline smoke test only (no Codex subscription was needed to write it, but
-> none was available to run it either). If you try it, reports are welcome at
-> [Issues](https://github.com/lovaxi/Rubato_Plugins/issues) — missed states, a
-> device stuck in the breathing orb, wrong model names.
+> **Verified end-to-end** on Codex CLI 0.153.0 with a real device: full
+> Estimate → Thinking → Generating → Done cycles driven by live Codex turns.
+> If anything misbehaves on your setup, reports are welcome at
+> [Issues](https://github.com/lovaxi/Rubato_Plugins/issues).
 
 ### Claude Code
 

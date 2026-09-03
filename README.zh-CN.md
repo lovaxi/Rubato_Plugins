@@ -20,7 +20,7 @@ Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个
 |---|---|---|
 | [dsh/](dsh/) | DeepSeek Harness | 可用 |
 | [openclaw/](openclaw/) | OpenClaw | 可用 |
-| [codex/](codex/) | Codex | 可用——未经实测 |
+| [codex/](codex/) | Codex | 可用 |
 | claude-code/ | Claude Code | 计划中 |
 | [cursor/](cursor/) | Cursor | 可用——未经实测 |
 | [opencode/](opencode/) | OpenCode | 可用 |
@@ -199,10 +199,9 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 然后把设备贴纸上的两个值填进去——username = deviceId（`RUBATO-xxxxxx`），
 password = 对应 token——保存即完成，插件在下一条记录自动启用，无需重启。
 
-> **⚠️ 未经真实 Codex 实测**：rollout 事件映射仅通过离线冒烟测试验证（写它
-> 不需要 Codex 订阅，跑它也没得跑）。如果你实测了，欢迎到
-> [Issues](https://github.com/lovaxi/Rubato_Plugins/issues) 反馈：状态漏报、
-> 设备卡在呼吸态、模型名不对等。
+> **已端到端实测**：在 Codex CLI 0.153.0 + 真实设备上验证了由真实 Codex 回合
+> 驱动的完整 Estimate → Thinking → Generating → Done 循环。如果你的环境有
+> 问题，欢迎到 [Issues](https://github.com/lovaxi/Rubato_Plugins/issues) 反馈。
 
 ### Claude Code
 
