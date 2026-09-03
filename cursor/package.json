@@ -1,8 +1,8 @@
 {
   "name": "rubato-cursor",
   "displayName": "Rubato",
-  "description": "Rubato (musical term: stolen time) model-state monitor for Cursor: derives AI working state from workspace edit bursts (Estimate/Thinking/Generating/Done), estimates duration locally (feature-based kNN), and publishes lean records to EMQX (rubato/<deviceId>/state) with derived clientId CUR-<username>.",
-  "version": "1.0.0",
+  "description": "Rubato (musical term: stolen time) model-state monitor for Cursor: derives AI working state from workspace edit bursts and publishes lean Estimate/Thinking/Generating/Done records to EMQX (rubato/<deviceId>/state). User-side port — no model tools, no local writes beyond the config. deviceId format: Cursor-RUBATO-<mac6>; derived clientId CUR-<username>.",
+  "version": "1.1.0",
   "publisher": "lovaxi",
   "license": "GPL-3.0",
   "repository": {

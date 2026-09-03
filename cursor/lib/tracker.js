@@ -13,11 +13,12 @@
 //                                          flashes Done, like dsh's tool-calls
 //                                          handling and opencode's debounce)
 //
-// Semantics kept identical to dsh: Estimate precedes everything, Thinking
-// fires at burst open (not on some later delta), Done is the only lean-wire
-// message (publish(record, wire) separation), calibration backfills on the
-// features captured at burst START. Error+Done has no Cursor equivalent — the
-// host exposes no failure signal (see extension.js header).
+// User-side wire (spec §2.3/§2.4-7): every record is lean and there is NO
+// local archive — Estimate carries no estSec (the zero-token estimator is a
+// dsh development facility, spec §3), Done is exactly { model, state, ts },
+// and publish() takes a single record. The quiet-window timer plus the
+// deactivate flush are the Done backstops required by §2.4-8: a burst always
+// closes, so the device never stays stuck breathing.
 //
 // All side effects are injected, so tools/cursor-smoke-test.mjs can drive the
 // machine offline (no vscode, no broker).
@@ -25,10 +26,8 @@
 
 function createTracker(deps) {
   // deps: {
-  //   publish:    async (record, wire?) -> void     (archive + MQTT in extension.js)
-  //   estimateMs: (model, feat) -> number           (zero-token kNN prediction)
-  //   backfill:   (model, feat, ms, estMs) -> void  (calibration sample store)
-  //   settings:   () -> { modelLabel, settleMs, minBurstChars, maxBurstMs }
+  //   publish:  async (record) -> void     (MQTT only; no local writes)
+  //   settings: () -> { modelLabel, settleMs, minBurstChars, maxBurstMs }
   //   now, setTimeout, clearTimeout: injectable clock/timers (optional)
   // }
   const now = deps.now || (() => Date.now())
@@ -45,19 +44,10 @@ function createTracker(deps) {
     const b = burst
     burst = null
     if (!b) return
-    const ms = now() - b.startedAt
-    const ts = now()
-    // Done wire contract is lean: { model, state, ts }. The burst stats ride
-    // in the archive record only — publish(record, wire) separation (dsh keeps
-    // tokens there; Cursor's observable extras are the burst metrics).
-    deps.publish(
-      { model: b.model, state: 'Done', ts, dur: ms, files: b.docs.size, chars: b.chars, edits: b.edits },
-      { model: b.model, state: 'Done', ts },
-    )
-    // Backfill calibration on the features captured at burst START, so
-    // predict and train always see the same signal.
-    deps.backfill(b.model, b.feat, ms, b.estMs)
-    return { reason, ms }
+    // Done wire contract: { model, state, ts } — lean, no extra fields
+    // (user-side plugins have no archive to carry a fuller record).
+    deps.publish({ model: b.model, state: 'Done', ts: now() })
+    return { reason }
   }
 
   // edit: { docId, chars, focused } — one document change event, already
@@ -66,24 +56,17 @@ function createTracker(deps) {
   function onEdit(edit) {
     const s = deps.settings()
     if (!burst) {
-      const feat = {
-        c: Math.max(0, Math.round(edit.chars)),
-        l: 0, f: 0, v: 0, fl: 0, n: 1, e: '',
-      }
       const model = s.modelLabel
-      const estMs = Math.round(deps.estimateMs(model, feat))
       const t0 = now()
       burst = {
         model,
-        feat,
-        estMs,
         startedAt: t0,
         chars: edit.chars,
         edits: 1,
         docs: new Set([edit.docId]),
         generated: false,
       }
-      deps.publish({ model, state: 'Estimate', ts: t0, estSec: Math.round(estMs / 100) / 10 })
+      deps.publish({ model, state: 'Estimate', ts: t0 })
       // Thinking at burst open — not on some later "first delta": the device
       // must not trail the real rhythm (same reasoning as dsh §2.4-2).
       deps.publish({ model, state: 'Thinking', ts: t0 })

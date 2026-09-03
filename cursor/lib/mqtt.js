@@ -6,7 +6,8 @@
 // full DNS+TCP+TLS+CONNECT round trip. Broker: EMQX Cloud Serverless
 // (TLS-only); explicit SNI (servername) is required or the shared front-end
 // cannot route the tenant. Auth matches the device firmware (rubato.ino):
-// username = deviceId (RUBATO-<mac6>), password = the per-unit token.
+// username = deviceId (Cursor-RUBATO-<mac6> for the Cursor fleet), password =
+// the per-unit token.
 'use strict'
 
 const net = require('net')
@@ -201,7 +202,7 @@ function publishOnConn(c, topicBuf, payload, qos) {
  * @returns {Promise<{ok: true}>} resolves on PUBACK (qos1) or send (qos0); rejects on failure.
  */
 async function publishRecord(config, record) {
-  // clientId goes to the broker exactly as configured (CUR-RUBATO-<mac6>) — no
+  // clientId goes to the broker exactly as configured (CUR-Cursor-RUBATO-<mac6>) — no
   // extra suffix. It differs from the device's own clientId (= deviceId), so
   // the two clients never kick each other. Note: only ONE publishing process
   // may run at a time — the Serverless front-end rejects a duplicate clientId

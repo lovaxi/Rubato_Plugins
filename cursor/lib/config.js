@@ -1,22 +1,27 @@
 // Rubato config for the Cursor extension — identity + MQTT endpoint, same
-// shape as the dsh/ and opencode/ plugins (authoritative: dsh/lib/index.js).
+// shape as the dsh/ and openclaw/ plugins (authoritative: dsh/lib/index.js).
 //
-// Lookup order: the extension host process cwd's dsh-mqtt-config.json first —
-// the SAME file the other Rubato host plugins read, so one machine with one
-// device shares one config across harnesses — then the plugin directory (the
-// template lands here on first run; config travels with the install). First
-// existing file wins; the extension hot-reloads it on every publish.
+// Generic config name shared by every Rubato host plugin (spec §4): looked up
+// in the extension host process cwd first — one shared config for every
+// harness on this machine — then in the plugin directory (the template lands
+// here on first run; config travels with the install). The pre-rename name
+// `dsh-mqtt-config.json` is migrated in place on first lookup in a directory
+// (skipped when the new name already exists there; if the rename fails the
+// legacy path keeps working). First existing file wins; the extension
+// hot-reloads the config on every publish.
 //
-// Identity is USER-ENTERED, exactly like every other Rubato plugin: username =
-// the deviceId printed on the device sticker (RUBATO-<mac6>), password = its
-// token. Nothing is derived from the host machine and the sticker value is
-// used verbatim. clientId/topic/enabled are identity-derived.
+// Identity is USER-ENTERED: username = the deviceId printed on the device
+// sticker — Cursor-fleet devices are provisioned as `Cursor-RUBATO-<mac6>`
+// (the `Cursor-` prefix capitalized exactly like that) — and password = the
+// token paired with it. The sticker value is used verbatim; nothing is
+// derived from the host machine. clientId/topic/enabled are identity-derived.
 'use strict'
 
 const fs = require('fs')
 const path = require('path')
 
-const CONFIG_NAME = 'dsh-mqtt-config.json'
+const CONFIG_NAME = 'rubato-mqtt-config.json'
+const LEGACY_CONFIG_NAME = 'dsh-mqtt-config.json'
 
 // clientId prefix for this harness — registered in PLUGIN_SPEC §2.2.
 const CLIENT_ID_PREFIX = 'CUR-'
@@ -28,18 +33,34 @@ const DEFAULTS = {
   host: 'ubaa35f0.ala.cn-shenzhen.emqxsl.cn', // EMQX Cloud Serverless, TLS-only
   port: 8883,
   tls: true,
-  clientId: '', // derived: CUR-<username> (= CUR-RUBATO-<mac6>)
+  clientId: '', // derived: CUR-<username> (= CUR-Cursor-RUBATO-<mac6>)
   username: '',
   password: '',
   topic: '', // derived: rubato/<username>/state
   qos: 1,
 }
 
+// Spec §4: the legacy config file is migrated (renamed) on first lookup in a
+// directory — skipped when the new name already exists there; if the rename
+// fails (locked etc.) the legacy path keeps working below.
+function migrateLegacyConfig(dir) {
+  const newPath = path.join(dir, CONFIG_NAME)
+  const oldPath = path.join(dir, LEGACY_CONFIG_NAME)
+  try {
+    if (fs.existsSync(oldPath) && !fs.existsSync(newPath)) fs.renameSync(oldPath, newPath)
+  } catch { /* rename failed: the legacy path keeps working below */ }
+}
+
+// Candidates in lookup order: per directory (cwd first, then plugin root),
+// the new name first and the legacy name as fallback (covers a failed rename).
 function configCandidates() {
-  return [
-    path.join(process.cwd(), CONFIG_NAME),
-    path.join(__dirname, '..', CONFIG_NAME),
-  ]
+  const dirs = [process.cwd(), path.join(__dirname, '..')]
+  const out = []
+  for (const dir of dirs) {
+    migrateLegacyConfig(dir)
+    out.push(path.join(dir, CONFIG_NAME), path.join(dir, LEGACY_CONFIG_NAME))
+  }
+  return out
 }
 
 // Fill the identity-derived fields the user never has to configure, and
@@ -91,4 +112,4 @@ function createConfigTemplate() {
   return p
 }
 
-module.exports = { CONFIG_NAME, CLIENT_ID_PREFIX, DEFAULTS, configCandidates, deriveIdentity, loadConfig, createConfigTemplate }
+module.exports = { CONFIG_NAME, LEGACY_CONFIG_NAME, CLIENT_ID_PREFIX, DEFAULTS, configCandidates, deriveIdentity, loadConfig, createConfigTemplate }
