@@ -216,6 +216,13 @@ the same generic file every Rubato host on this machine reads; the legacy
 registers + starts a hidden logon Scheduled Task `RubatoCodexWatcher` running
 the watcher.
 
+> **Heads-up:** the watcher is a hidden background `node.exe` process that
+> must stay running — it is the part that observes Codex and talks to the
+> device. Closing or restarting the Codex app/CLI is fine and unrelated; just
+> don't kill stray `node.exe` processes in Task Manager. If the watcher ever
+> dies anyway, the next Codex turn's `notify` hook revives it and un-sticks
+> the device.
+
 Then fill the two values from the device sticker — username = deviceId
 (`RUBATO-xxxxxx`), password = its token — by editing the file. Save — the
 plugin auto-enables on the next record; no restart needed.

@@ -190,6 +190,11 @@ powershell -ExecutionPolicy Bypass -File install.ps1
 钩子则保持不动），并注册 + 启动隐藏的开机登录计划任务 `RubatoCodexWatcher`
 运行 watcher。
 
+> **注意**：watcher 是一个隐藏的后台 `node.exe` 进程，必须保持运行——它就是
+> 观察 Codex、驱动设备的那部分。退出或重启 Codex 应用/CLI 完全没关系；只是
+> 不要在任务管理器里顺手杀掉 `node.exe` 进程。万一 watcher 真的死了，下一次
+> Codex 回合的 `notify` 钩子会把它拉起来并解卡设备。
+
 然后把设备贴纸上的两个值填进去——username = deviceId（`RUBATO-xxxxxx`），
 password = 对应 token——保存即完成，插件在下一条记录自动启用，无需重启。
 
