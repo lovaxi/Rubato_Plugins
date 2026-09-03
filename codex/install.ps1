@@ -59,19 +59,31 @@ if (-not $NoNotify) {
   }
 }
 
-# 4. scheduled task for the watcher (runs hidden at logon, auto-restarts)
+# 4. scheduled task for the watcher (runs at logon, auto-restarts, INVISIBLE)
+#    The task action launches node through a one-line WScript stub with window
+#    style 0: a console app started directly by a task opens a visible (and
+#    accidentally closeable) console window — the task's -Hidden flag does NOT
+#    hide it. Via the stub the watcher has no console at all: nothing on
+#    screen, nothing to close, immune to console-close kills (0xC000013A).
 if (-not $NoTask) {
   $watcher = Join-Path $PluginRoot 'lib\watcher.js'
-  $action = New-ScheduledTaskAction -Execute 'node.exe' -Argument "`"$watcher`"" -WorkingDirectory $PluginRoot
+  $nodeExe = (Get-Command node).Source
+  $vbs = Join-Path $PluginRoot 'rubato-watch.vbs'
+  $vbsText = "' Rubato Codex watcher - windowless launcher (window style 0: no" + "`r`n" +
+             "' console window, so there is nothing to close and no way to kill" + "`r`n" +
+             "' the watcher by closing a window)." + "`r`n" +
+             'CreateObject("WScript.Shell").Run """' + $nodeExe + '"" ""' + $watcher + '""", 0, False' + "`r`n"
+  [IO.File]::WriteAllText($vbs, $vbsText, [Text.UTF8Encoding]::new($false))
+  $action = New-ScheduledTaskAction -Execute 'wscript.exe' -Argument "`"$vbs`"" -WorkingDirectory $PluginRoot
   $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
   $settings = New-ScheduledTaskSettingsSet -Hidden -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries `
-    -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero) `
+    -RestartCount 10 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero) `
     -MultipleInstances IgnoreNew
   try {
     Register-ScheduledTask -TaskName $TaskName -Action $action -Trigger $trigger -Settings $settings `
-      -Description 'Rubato Codex plugin: publishes Codex CLI model state to the Rubato device over MQTT.' -Force | Out-Null
+      -Description 'Rubato Codex plugin: publishes Codex CLI model state to the Rubato device over MQTT (windowless).' -Force | Out-Null
     Start-ScheduledTask -TaskName $TaskName
-    Write-Host "[ok] scheduled task '$TaskName' registered and started (logon trigger, hidden)"
+    Write-Host "[ok] scheduled task '$TaskName' registered and started (logon trigger, windowless)"
   } catch {
     Write-Warning "could not register the scheduled task ($($_.Exception.Message)); run the watcher manually:"
     Write-Host "  node `"$watcher`""

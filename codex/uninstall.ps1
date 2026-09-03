@@ -23,6 +23,12 @@ try {
 } catch {
   Write-Host "[ok] no scheduled task found"
 }
+# any watcher node still running from the old task keeps the MQTT clientId —
+# stop it so a fresh install does not fight a ghost
+Get-Process node -ErrorAction SilentlyContinue | ForEach-Object {
+  $cl = (Get-CimInstance Win32_Process -Filter "ProcessId=$($_.Id)").CommandLine
+  if ($cl -like "*$PluginRoot*watcher.js*") { Stop-Process -Id $_.Id -Force; Write-Host "[ok] stopped lingering watcher (pid $($_.Id))" }
+}
 
 # 2. notify hook line (only the one pointing at this plugin's notify.js)
 $toml = Join-Path $CodexHome 'config.toml'

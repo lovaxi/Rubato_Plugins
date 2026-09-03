@@ -213,15 +213,15 @@ the same generic file every Rubato host on this machine reads; the legacy
 `dsh-mqtt-config.json` is migrated in place on first lookup), adds
 `notify = ["node", '<repo>\codex\lib\notify.js']` to `~/.codex/config.toml`
 (backup written first; an existing notify hook is left untouched), and
-registers + starts a hidden logon Scheduled Task `RubatoCodexWatcher` running
-the watcher.
+registers + starts an invisible (windowless) logon Scheduled Task
+`RubatoCodexWatcher` running the watcher — no console window on your desktop.
 
-> **Heads-up:** the watcher is a hidden background `node.exe` process that
-> must stay running — it is the part that observes Codex and talks to the
-> device. Closing or restarting the Codex app/CLI is fine and unrelated; just
-> don't kill stray `node.exe` processes in Task Manager. If the watcher ever
-> dies anyway, the next Codex turn's `notify` hook revives it and un-sticks
-> the device.
+> **Heads-up:** the watcher runs fully invisibly (no window) as a `node.exe`
+> process — it is the part that observes Codex and talks to the device, so it
+> must stay running. Closing or restarting the Codex app/CLI is fine and
+> unrelated; just don't kill `node.exe`/`wscript.exe` in Task Manager. If the
+> watcher ever dies anyway, the next Codex turn's `notify` hook revives it and
+> un-sticks the device.
 
 Then fill the two values from the device sticker — username = deviceId
 (`RUBATO-xxxxxx`), password = its token — by editing the file. Save — the
