@@ -22,7 +22,7 @@ Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个
 | [openclaw/](openclaw/) | OpenClaw | 可用 |
 | codex/ | Codex | 计划中 |
 | claude-code/ | Claude Code | 计划中 |
-| [cursor/](cursor/) | Cursor | 可用 |
+| [cursor/](cursor/) | Cursor | 可用——未经实测 |
 | [opencode/](opencode/) | OpenCode | 可用 |
 
 ## MQTT 契约
@@ -80,6 +80,13 @@ Install the Rubato plugin for OpenCode from https://github.com/lovaxi/Rubato_Plu
 ### Cursor
 
 Cursor 是 VS Code 的分支，插件以 VSIX 形式安装——无需任何构建工具。
+
+> **⚠️ 未经实测**：作者没有 Cursor 付费订阅（无法自定义模型，触发不了真实
+> 的 AI 编辑），编辑突发检测与整体设备映射仍停留在设计阶段（仅离线冒烟测试，
+> 未在真实 Cursor 会话中运行过）。如果你实测了，欢迎到
+> [Issues](https://github.com/lovaxi/Rubato_Plugins/issues) 反馈实际表现：
+> 人类输入被误判为 AI、AI 编辑漏报、设备卡在某个状态等；阈值调参的 PR 尤其
+> 欢迎。
 
 **最简安装 —— 两步：**
 

@@ -24,7 +24,7 @@ model call ──> Rubato plugin ──> EMQX broker ──> Rubato device (TFT 
 | [openclaw/](openclaw/) | OpenClaw | available |
 | codex/ | Codex | planned |
 | claude-code/ | Claude Code | planned |
-| [cursor/](cursor/) | Cursor | available |
+| [cursor/](cursor/) | Cursor | available — untested |
 | [opencode/](opencode/) | OpenCode | available |
 
 ## MQTT contract
@@ -92,6 +92,15 @@ Save — the plugin auto-enables on the next message; no restart needed.
 
 Cursor is a VS Code fork, so the plugin installs as a VSIX — no build tools
 needed.
+
+> **⚠️ Untested in the wild:** the author has no Cursor paid plan, so real AI
+> edit bursts could never be triggered — the burst detection and the whole
+> device mapping are design-stage only (offline smoke-tested, never run
+> against a live Cursor session). If you try it, please report how it behaves
+> — false positives from human typing, missed bursts, a device stuck in one
+> state — in
+> [Issues](https://github.com/lovaxi/Rubato_Plugins/issues). Threshold-tuning
+> PRs are especially welcome.
 
 **Simplest install — two steps:**
 
