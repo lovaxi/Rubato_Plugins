@@ -26,6 +26,7 @@ model call ──> Rubato plugin ──> EMQX broker ──> Rubato device (TFT 
 | [claude-code/](claude-code/) | Claude Code | available |
 | [cursor/](cursor/) | Cursor | available — untested |
 | [opencode/](opencode/) | OpenCode | available |
+| [antigravity/](antigravity/) | Antigravity | available |
 
 ## MQTT contract
 
@@ -260,6 +261,51 @@ daemon that owns the single persistent MQTT connection (clientId
 the plugin keeps zero persistent local files except the config. Offline
 smoke test: `node claude-code/tools/cc-smoke-test.mjs` — spins up a local
 fake MQTT broker and asserts the real wire traffic.
+
+### Antigravity
+
+Install globally (copy `antigravity/` to `~/.gemini/config/plugins/rubato`):
+
+```powershell
+# Windows (PowerShell)
+git clone https://github.com/lovaxi/Rubato_Plugins.git
+Copy-Item -Recurse -Force .\Rubato_Plugins\antigravity "$env:USERPROFILE\.gemini\config\plugins\rubato"
+```
+
+```bash
+# macOS / Linux
+git clone https://github.com/lovaxi/Rubato_Plugins.git
+mkdir -p ~/.gemini/config/plugins && cp -r ./Rubato_Plugins/antigravity ~/.gemini/config/plugins/rubato
+```
+
+Or paste this into an Antigravity chat (for global or `<project>/.agents/plugins/rubato` install):
+
+```text
+Install the Rubato plugin for Antigravity from https://github.com/lovaxi/Rubato_Plugins/antigravity
+```
+
+After install:
+
+1. The first model invocation creates a `rubato-mqtt-config.json` template
+   (under Antigravity's `PLUGIN_DATA` dir, or the plugin root) and shows a
+   one-time `SETUP REQUIRED` guide inline.
+2. Fill the two values from the device sticker — username = deviceId
+   (`RUBATO-xxxxxx`), password = its token — into that file (or into
+   `rubato-mqtt-config.json` in your workspace cwd to share across harnesses).
+
+Save — the plugin auto-enables on the next invocation; no restart needed.
+
+Antigravity runs lifecycle hooks (`hooks.json` at the plugin root) as
+synchronous shell commands, so the plugin runs one detached daemon that owns
+the single persistent MQTT connection (clientId `AGY-RUBATO-<mac6>`) and
+tails the session `transcript.jsonl`; hooks drop events into a spool in the
+OS temp dir, and the plugin keeps zero persistent local files except the
+config. Offline smoke test: `node antigravity/scripts/agy-smoke-test.mjs`
+— spins up a local fake MQTT broker and asserts the real wire traffic.
+
+> **Verified end-to-end** on Antigravity with a real device: full
+> `Estimate → Thinking → Generating → Done` cycles driven by live
+> Antigravity turns.
 
 ## License
 

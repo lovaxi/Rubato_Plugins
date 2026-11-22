@@ -1,0 +1,44 @@
+{
+  "rubato": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "node ./hooks/hook.mjs session-start",
+        "timeout": 10
+      }
+    ],
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "node ./hooks/hook.mjs pre-invocation",
+        "timeout": 10
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ./hooks/hook.mjs post-tool-use",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostInvocation": [
+      {
+        "type": "command",
+        "command": "node ./hooks/hook.mjs post-invocation",
+        "timeout": 10
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node ./hooks/hook.mjs stop",
+        "timeout": 10
+      }
+    ]
+  }
+}

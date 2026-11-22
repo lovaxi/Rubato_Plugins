@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <title>Rubato</title>
+  <rect x="34" y="28" width="188" height="200" rx="22" fill="#e8dfd1" stroke="#2c2623" stroke-width="10"/>
+  <rect x="54" y="48" width="148" height="106" rx="12" fill="#18202c" stroke="#2c2623" stroke-width="6"/>
+  <circle cx="128" cy="101" r="34" fill="#6fd3ff" opacity="0.28"/>
+  <circle cx="128" cy="101" r="22" fill="#8ae0ff"/>
+  <circle cx="121" cy="94" r="6" fill="#ffffff" opacity="0.8"/>
+  <rect x="60" y="176" width="52" height="10" rx="5" fill="#9a8f80"/>
+  <rect x="148" y="176" width="46" height="8" rx="4" fill="#2c2623"/>
+  <circle cx="188" cy="204" r="7" fill="#4fd18b"/>
+</svg>

@@ -43,6 +43,7 @@
 | OpenClaw | `Claw-`（`Claw-` + username = `Claw-RUBATO-<mac6>`） | 在用 |
 | Claude Code | `CC-RUBATO-`（作用于 mac6：`CC-RUBATO-<mac6>`） | 在用 |
 | Codex | `Codex-`（`Codex-` + username = `Codex-RUBATO-<mac6>`） | 在用 |
+| Antigravity | `AGY-`（`AGY-` + username = `AGY-RUBATO-<mac6>`） | 在用 |
 
 - 前缀存在的理由：与设备自身的 clientId（= deviceId）以及其他智能体的 clientId 互不相同，**并发运行的多个宿主进程互不踢线**。
 - EMQX Serverless 对重复 clientId 返回 CONNACK 2（拒绝接管会话），因此同一 clientId 的两次连接是硬错误，不是"挤掉旧连接"。

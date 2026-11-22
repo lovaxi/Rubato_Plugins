@@ -1,0 +1,13 @@
+# Runtime artifacts (never publish credentials or usage data)
+# Generic config name shared by every Rubato plugin + legacy names (spec §4)
+rubato-mqtt-config.json
+dsh-mqtt-config.json
+agy-mqtt-config.json
+rubato-records.jsonl
+rubato-stats.json
+thinktime-records.jsonl
+thinktime-stats.json
+.smoke/
+node_modules/
+*.log
+.DS_Store

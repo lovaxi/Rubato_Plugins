@@ -1,0 +1,18 @@
+{
+  "name": "rubato-antigravity",
+  "version": "1.0.0",
+  "description": "Rubato (musical term: stolen time) model-state monitor for Google Antigravity: maps lifecycle hooks and session transcripts to Estimate/Thinking/Generating/Done/Error states and publishes lean records to EMQX (rubato/<deviceId>/state) with derived clientId AGY-RUBATO-<mac6>.",
+  "type": "module",
+  "main": "lib/daemon.mjs",
+  "scripts": {
+    "smoke": "node scripts/agy-smoke-test.mjs",
+    "status": "node scripts/status.mjs"
+  },
+  "keywords": [
+    "antigravity",
+    "agy",
+    "rubato",
+    "mqtt"
+  ],
+  "license": "GPL-3.0"
+}

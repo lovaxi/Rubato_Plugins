@@ -1,0 +1,13 @@
+{
+  "name": "rubato",
+  "displayName": "Rubato",
+  "description": "Rubato desk-device status monitor for Antigravity: publishes Estimate, Thinking, Generating, Done, and Error states per turn to your Rubato device over EMQX MQTT.",
+  "version": "1.0.0",
+  "logo": "assets/logo.svg",
+  "author": {
+    "name": "lovaxi",
+    "url": "https://github.com/lovaxi"
+  },
+  "homepage": "https://github.com/lovaxi/Rubato_Plugins/tree/main/antigravity",
+  "repository": "https://github.com/lovaxi/Rubato_Plugins"
+}

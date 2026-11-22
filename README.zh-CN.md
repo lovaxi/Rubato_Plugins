@@ -24,6 +24,7 @@ Rubato 让 AI 的工作状态在桌面实体设备上可见。本仓库为每个
 | [claude-code/](claude-code/) | Claude Code | 可用 |
 | [cursor/](cursor/) | Cursor | 可用——未经实测 |
 | [opencode/](opencode/) | OpenCode | 可用 |
+| [antigravity/](antigravity/) | Antigravity | 可用 |
 
 ## MQTT 契约
 
@@ -229,6 +230,48 @@ Claude Code 没有进程内插件 API，插件由一个常驻守护进程独享�
 除配置外插件零持久本地文件。离线冒烟测试：
 `node claude-code/tools/cc-smoke-test.mjs`——本地起一个假 MQTT broker，
 断言真实 wire 流量。
+
+### Antigravity
+
+全局安装（将 `antigravity/` 复制到 `~/.gemini/config/plugins/rubato`）：
+
+```powershell
+# Windows (PowerShell)
+git clone https://github.com/lovaxi/Rubato_Plugins.git
+Copy-Item -Recurse -Force .\Rubato_Plugins\antigravity "$env:USERPROFILE\.gemini\config\plugins\rubato"
+```
+
+```bash
+# macOS / Linux
+git clone https://github.com/lovaxi/Rubato_Plugins.git
+mkdir -p ~/.gemini/config/plugins && cp -r ./Rubato_Plugins/antigravity ~/.gemini/config/plugins/rubato
+```
+
+或在 Antigravity 对话里粘贴（安装到全局或项目 `<项目根目录>/.agents/plugins/rubato`）：
+
+```text
+Install the Rubato plugin for Antigravity from https://github.com/lovaxi/Rubato_Plugins/antigravity
+```
+
+安装后：
+
+1. 首次模型调用会自动生成 `rubato-mqtt-config.json` 模板（位于 Antigravity
+   的 `PLUGIN_DATA` 目录或插件根目录），并内联展示一次性的 `SETUP REQUIRED`
+   指南。
+2. 把设备贴纸上的两个值填进去——username = deviceId（`RUBATO-xxxxxx`），
+   password = 对应 token——编辑该文件即可（也可放在工作区 cwd 共享）。
+
+保存即完成——插件在下一轮调用自动启用，无需重启。
+
+Antigravity 的生命周期钩子（插件根目录 `hooks.json`）以同步命令运行，插件
+由一个常驻守护进程独享单条持久 MQTT 连接（clientId `AGY-RUBATO-<mac6>`）并
+跟踪会话 `transcript.jsonl`；钩子把事件丢进系统临时目录的 spool，除配置外
+插件零持久本地文件。离线冒烟测试：
+`node antigravity/scripts/agy-smoke-test.mjs`——本地起一个假 MQTT broker，
+断言真实 wire 流量。
+
+> **已端到端实测**：在 Antigravity + 真实设备上验证了完整
+> `Estimate → Thinking → Generating → Done` 循环。
 
 ## 许可证
 
